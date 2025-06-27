@@ -1,37 +1,33 @@
 # Table of Contents
 
-- [📖 Project Overview](#-project-overview)
-- [👥 Roles and Responsibilities of Collaborators](#-roles-and-responsibilities-of-collaborators)
+- [📖 Get an Overview](#-get-an-overview)
+- [👥 Meet the Core Team](#-meet-the-core-team)
 - [📊 Gather Data](#-gather-data)
 - [🌍 Identify Global Events](#-identify-global-events)
 - [⚙️ Process Data](#️-process-data)
 - [🔧 How to Install](#-how-to-install)
-- [📚 Glossary](#-glossary)
+- [📚 List Acronyms](#-list-acronyms)
 
-# 📖 Project Overview
+# 📖 Get an Overview
 
 [**SolarSoundBytes**](https://solar-sound-bytes.up.railway.app/) is a data-driven machine-learning project that explores the global sentiment towards **renewable energy** and **energy storage** in the timeframe from 2022-01-02 to 2024-12-24.
 
 This project is a real-world application of the learnings acquired
-during our 
-[9-week bootcamp at Le Wagon](https://www.lewagon.com/barcelona/data-science-course) and was created during our final 2 weeks together in Barcelona from June 2 to 13, 2025.
-
-
+during a [9-week bootcamp at Le Wagon](https://www.lewagon.com/barcelona/data-science-course) and was created during [our](#-core-team) final 2 weeks together in Barcelona from June 2 to 13, 2025.
 
 
 ## Input: Sentiment Analysis
 
 Sentiment analysis is a well-known Natural Language Processing (NLP) technique used to determine the emotional tone of a text, classifying it as either positive, negative, or neutral. 
 
-- The sentiment of the general public is being inferred by performing sentiment analysis on **130k+ public tweets (TODO link to dataset description)**. 
-- Analogously, the sentiment of official channels is derived by sentiment analysis on **4k+ official news articles (TODO link to dataset description)**. 
+- The sentiment of the general public is being inferred by performing sentiment analysis on **130k+ tweets (TODO link to dataset description)**. 
+- Analogously, the sentiment of official channels is derived by sentiment analysis on **4k+ news articles (TODO link to dataset description)**. 
 
-By feeding the sentiment analysis results of these 2 datasets into an [interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard), the user is empowered to investigate possible
-correlations between public and official sentiments as well as compare those data with further metrics. 
+By feeding the sentiment analysis results of these 2 datasets into an [interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard), the user is empowered to perform an independent investigation and identify possible correlations between public and official sentiments as well as compare those sentiments with additional metrics. 
 
 ## Input: Additional Metrics
 
-So far, two additional metrics to optionally overlay with sentiment analysis results have been implemented, covering the same timeframe from 2022-01-02 to 2024-12-24. 
+So far, two additional metrics have been implemented, which can be optionally overlaid to compare with sentiments during the same timeframe from 2022-01-02 to 2024-12-24. 
 
 1. Global capacity of renewable energy and energy storage technologies (TODO LINK AND NAME OF RENEWABLES DATASET). 
 2. S&P 500 (TODO LINK AND NAME OF ECONOMIC DATASET)
@@ -39,15 +35,16 @@ So far, two additional metrics to optionally overlay with sentiment analysis res
 
 ## Output: SoundBytes
 
-Based on custom user inputs compiled from the a chosen  timeframe of [sentiment analysis results](#input-sentiment-analysis) and optional overlay of [additional metrics](#input-additional-metrics), the user can trigger the creation of a customized **SoundByte**. 
+To draw your own conclusions regarding the ongoing energy transition, you can play with our extensive dataset using an [interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard).
 
-A SoundByte is a short audio summary which turns the chosen data range into a simple and easily digestible explanation. Users can pick any combination of data streams for a specific time period to generate custom audio reports, making the complex and multi-layered topic of energy transition accessible to everyone.
+Users can pick any combination of data streams for a specific time period to generate custom audio reports, making the complex and multi-layered topic of energy transition accessible to everyone. Based on the user-defined timeframe of [sentiment analysis results](#input-sentiment-analysis) and optional [additional metrics](#input-additional-metrics), turned on or off by the user, the user can trigger the generation of an AI report.
 
-To draw your own concusions, you can play with our extensive dataset using [our interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard).
+This report is displayed as plain text and also available in audio format, aka a **SoundByte**. 
+
+A SoundByte is a short audio summary which turns the chosen data range into a simple and easily digestible explanation. 
 
 
-
-# 👥 Roles and Responsibilities of Collaborators
+# 👥 Meet the Core Team
 
 | Name                  | GitHub                                                 | Role             | Content                                                                                                                                                               |
 | --------------------- | ------------------------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,9 +56,7 @@ To draw your own concusions, you can play with our extensive dataset using [our 
 
 ## News Articles from Cleantech Media Dataset
 
-Online research for datasets of news-articles in the field of renewable energy
-technologies led us to the
-[Cleantech Media Dataset by Anacode](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
+Online research for datasets of news-articles in the field of renewable energy technologies led us to the [Cleantech Media Dataset by Anacode](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
 
 - 20K articles in total
 - Build a code for text processing: cleaning signs & digits, stopwords,
@@ -134,41 +129,23 @@ technologies led us to the
 
 ## Social Media Data from Twitter
 
-To compare the sentiment of news articles to a broader public sentiment, we
-looked for a fitting twitter dataset.
+To compare the sentiment of news articles to a broader public sentiment, we looked for a fitting twitter dataset.
 
-Although
-[the Climate Change Twitter Dataset](https://www.kaggle.com/datasets/deffro/the-climate-change-twitter-dataset)
-(15 million tweets spanning over 13 years) looked promising at first, we could
-not use it due to the lack of full-text tweets within.
+Although [the Climate Change Twitter Dataset](https://www.kaggle.com/datasets/deffro/the-climate-change-twitter-dataset), including 15 million tweets from 2006 to 2019, looked promising at first, we could not use it due to the lack of full-text tweets within.
 
-Since the
-[vast majority](#futile-rehydration-attempt-of-climate-change-twitter-dataset)
-of the most recent tweet_ids listed inside
-[the Climate Change Twitter Dataset](https://www.kaggle.com/datasets/deffro/the-climate-change-twitter-dataset)
-in GBR are no longer accessible, we abandoned our attempt to rehydrate this
-dataset.
+Since the [vast majority](#futile-rehydration-attempt-of-climate-change-twitter-dataset) of the most recent tweet_ids listed inside [the Climate Change Twitter Dataset](https://www.kaggle.com/datasets/deffro/the-climate-change-twitter-dataset) in GBR are no longer accessible, we abandoned our attempt to rehydrate this dataset.
 
-After extensive and unsuccessful further research for an alternative twitter
-dataset, we decided to create our own twitter dataset as input for a social
-media sentiment analysis using a
-[scraping actor](https://console.apify.com/actors/CJdippxWmn9uRfooo) on
-[console.apify](https://console.apify.com/).
+After extensive and unsuccessful further research for an alternative twitter dataset, we decided to create our own twitter dataset as input for a social media sentiment analysis using a [scraping actor](https://console.apify.com/actors/CJdippxWmn9uRfooo) on [console.apify](https://console.apify.com/).
 
-As a tradeoff between scraping cost, time and scraping-content, a sampling
-frequency of 1 day per month was chosen, applying an
-[actor-specific](https://console.apify.com/actors/CJdippxWmn9uRfooo) format of
-[scraping input parameters](data_acquisition/apify_twitter_sample_query.json).
+As a tradeoff between scraping cost, time and scraping-content, a sampling frequency of 1 day per month was chosen, applying an
+[actor-specific](https://console.apify.com/actors/CJdippxWmn9uRfooo) format of [scraping input parameters](data_acquisition/apify_twitter_sample_query.json).
 
 ### Rehydration of Climate Change Twitter Dataset
 
 To test rehydration of
 [the Climate Change Twitter Dataset](https://www.kaggle.com/datasets/deffro/the-climate-change-twitter-dataset),
-a tweet-subset of 557,125 tweets with geolocation coordinates inside GBR was
-selected.
-
-Rehydration was performed in chunks of up to 10k tweets. As shown in below
-table, the lack of data renders this rehydration attempt pointless.
+a tweet-subset of all tweets with geolocation coordinates inside GBR (=557,125 tweets) was selected.
+Rehydration was performed in chunks of up to 10k tweets. As shown in below table, the lack of data renders this rehydration attempt pointless.
 
 | range of GBR-tweet-numbers of tweet_ids in scraping-chunk | number of successful rehydrations | rehydration percentage of tweet chunk |
 | --------------------------------------------------------- | --------------------------------- | ------------------------------------- |
@@ -178,35 +155,26 @@ table, the lack of data renders this rehydration attempt pointless.
 
 ### Scraping Twitter Dataset
 
-To compile a twitter dataset covering the same topics as covered by the
-[Cleantech Media Dataset](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset),
-the
-[unique values in the cleantech "domains" column](preprocessing/scraping/cleantech_articles__unique_domains.txt)
-are used as search terms for scraping with the chosen
-[twitter scraper](https://console.apify.com/actors/CJdippxWmn9uRfooo).
+To compile a twitter dataset covering the same topics as covered by the [Cleantech Media Dataset](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset), the [unique values in the cleantech "domains" column](preprocessing/scraping/cleantech_articles__unique_domains.txt) are used as scraping query terms with the chosen [twitter scraper](https://console.apify.com/actors/CJdippxWmn9uRfooo).
 
-To work with a user-friendly scraping GUI while keeping scraping costs below 40
-USD/month, the following scraper was chosen:
+To work with a user-friendly scraping GUI while keeping scraping costs below 40 USD/month, the following scraper was chosen:
 
 - [Tweet Scraper|$0.25/1K Tweets | Pay-Per Result | No Rate Limits](https://console.apify.com/actors/CJdippxWmn9uRfooo/input?addFromActorId=CJdippxWmn9uRfooo).
 
-Unfortunately, this chosen scraping method was unable to handle more than 2
-search terms simultaneously.
+Unfortunately, this chosen scraping method was unable to handle more than 2 search terms simultaneously. 
+Attempts to use more than 2 search terms led to the scraper ignoring the time window, thus always returning the most recent results. 
 
-Therefore, the
-[initial list of search terms](preprocessing/scraping/cleantech_articles__unique_domains.txt)
-was replaced with just 2 overarching [search terms](#search-terms) to generate a
-twitter dataset with as large of a contextual overlap as possible with the
-[Cleantech Media Dataset by Anacode](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
+Therefore, the [initial list of search terms](preprocessing/scraping/cleantech_articles__unique_domains.txt) was replaced with just 2 overarching [search terms](#chosen-search-terms) to generate a twitter dataset with as large of a contextual overlap as possible with the [Cleantech Media Dataset by Anacode](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
 
-### Search Terms
+
+### Chosen Search Terms
 
 - renewable energy
 - energy storage
 
 # 🌍 Identify Global Events
 
-To identify around which specific dates to refine the twitter dataset to zoom
+To identify specific dates around which to refine our twitter dataset, i.e. to zoom
 into global events where a significant change in sentiment is highly probable, a
 [deep research was performed by iteratively prompting ChatGPT 4.1](https://chatgpt.com/share/68495bc3-ee6c-8006-9816-8b0480a0bf3c).
 
@@ -219,14 +187,14 @@ references and reasoning, see the
 
 ## Global Events Table
 
-| Date       | Event                                                                                                                                                                                                                | Country/Region | Expected Impact on Sentiment                 |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------- |
-| 2022-02-24 | [Russian invasion of Ukraine](https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine)                                                                                                                        | Global/EU      | Spike in interest and urgency for renewables |
-| 2022-05-18 | [EU announces REPowerEU plan](https://ec.europa.eu/commission/presscorner/detail/en/IP_22_3131)                                                                                                                      | EU             | Positive sentiment for renewables            |
-| 2022-08-16 | [US Inflation Reduction Act signed (major climate/energy provisions)](https://www.whitehouse.gov/briefing-room/statements-releases/2022/08/16/fact-sheet-the-inflation-reduction-act-supports-workers-and-families/) | USA            | Strong positive sentiment                    |
-| 2023-04-20 | [IEA reports global solar power generation surpasses oil for the first time](https://www.iea.org/news/solar-overtakes-oil-in-global-power-generation)                                                                | Global         | Positive sentiment for solar, shift from fossil fuels |
-| 2023-12-13 | [COP28 concludes with historic agreement to transition away from fossil fuels](https://unfccc.int/news/cop28-agrees-historic-deal-to-transition-away-from-fossil-fuels)                                             | Global         | Strong positive sentiment for renewables, policy optimism |
-| 2023-11-30 | [Global installed solar PV capacity surpasses 1 terawatt milestone](https://www.pv-magazine.com/2023/11/30/global-installed-solar-capacity-surpasses-1-tw/)                                                        | Global         | Positive sentiment, milestone for solar industry      |
+| Date         | Event                                                                                                                                                                                                                | Region | Expected Impact on Sentiment                 |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------- |
+| 2022-02-24   | [Russian invasion of Ukraine](https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine)                                                                                                                        | Global/EU      | Spike in interest and urgency for renewables |
+| 2022-05-18   | [EU announces REPowerEU plan](https://ec.europa.eu/commission/presscorner/detail/en/IP_22_3131)                                                                                                                      | EU             | Positive sentiment for renewables            |
+| 2022-08-16   | [US Inflation Reduction Act signed (major climate/energy provisions)](https://www.whitehouse.gov/briefing-room/statements-releases/2022/08/16/fact-sheet-the-inflation-reduction-act-supports-workers-and-families/) | USA            | Strong positive sentiment                    |
+| 2023-04-20   | [IEA reports global solar power generation surpasses oil for the first time](https://www.iea.org/news/solar-overtakes-oil-in-global-power-generation)                                                                | Global         | Positive sentiment for solar, shift from fossil fuels |
+| 2023-12-13   | [COP28 concludes with historic agreement to transition away from fossil fuels](https://unfccc.int/news/cop28-agrees-historic-deal-to-transition-away-from-fossil-fuels)                                             | Global         | Strong positive sentiment for renewables, policy optimism |
+| 2023-11-30   | [Global installed solar PV capacity surpasses 1 terawatt milestone](https://www.pv-magazine.com/2023/11/30/global-installed-solar-capacity-surpasses-1-tw/)                                                        | Global         | Positive sentiment, milestone for solar industry      |
 
 
 
@@ -240,17 +208,9 @@ references and reasoning, see the
 
 ### Results
 
-#### histogram confidence score vs sentiment color
+TODO-sample-screenshots-of-dashboard-results
 
-<img src="images/png/twitter/hist_confidenceScore__sentimentColor.png" alt="sentiment_analysis_twitter_and_news" width="500"/>
 
-#### sentiment score share over time
-
-<img src="images/png/twitter/sentiment_share_over_time_quarters.png" alt="sentiment_analysis_twitter_and_news" width="500"/>
-
-#### sentiment score share vs number of tweets over time
-
-<img src="images/png/twitter/sentiment_share_vs_nTweets_quarter.png" alt="sentiment_analysis_twitter_and_news" width="500"/>
 
 # 🔧 How to Install
 
@@ -262,30 +222,22 @@ cd /path/to/your/project-parent-folder
 git clone <paste_your_SSH_link_here>
 ```
 
-## create virtual environment using python version according to [Le Wagon](https://www.lewagon.com/barcelona/data-science-course)
+## create virtual python environment
 
 Separate local development environment from your global python environment to
 define specific packages and versions.
 
 ```shell
-# go to the project-folder
+# navigate into the cloned project folder
 cd /path/to/SolarSoundBytes
 
 pyenv virtualenv 3.12.9 SolarSoundBytes
 ```
 
-## activate virtual environment in cloned repo
+## activate the new virtual environment inside the cloned repo
 
 ```shell
 pyenv local SolarSoundBytes
-```
-
-## Install minimal packages
-
-```shell
-pip install --upgrade pip
-pip install -r https://gist.githubusercontent.com/krokrob/53ab953bbec16c96b9938fcaebf2b199/raw/9035bbf12922840905ef1fbbabc459dc565b79a3/minimal_requirements.txt
-pip list
 ```
 
 ## install requirements
@@ -297,28 +249,27 @@ pip install -r requirements.txt
 ## create data folder (untracked by .gitignore) and request data access from one of the authors
 
 ```shell
-touch data
+mkdir data
 ```
 
-# 📚 Glossary
+# 📚 List Acronyms
 
-- **API**: Application Programming Interface – a set of rules that allows
+- **API**: [Application Programming Interface](https://en.wikipedia.org/wiki/API) – a set of rules that allows
   different software applications to communicate with each other.
-- **GBR**: Great Britain
-- **GUI**: Graphical User Interface – a visual way of interacting with a
+- **GBR**: [Great Britain](https://en.wikipedia.org/wiki/Great_Britain)
+- **GUI**: [Graphical User Interface](https://en.wikipedia.org/wiki/Graphical_user_interface) – a visual way of interacting with a
   computer using items like windows, icons, and buttons.
-- **MVP**: Minimum Viable Product – the simplest version of a product that can
+- **MVP**: [Minimum Viable Product](https://en.wikipedia.org/wiki/Minimum_viable_product) – the simplest version of a product that can
   be released to test a new business idea and gather user feedback.
-- **NLP**: Natural Language Processing – a field of artificial intelligence
+- **NLP**: [Natural Language Processing](https://en.wikipedia.org/wiki/Natural_language_processing) – a field of artificial intelligence
   focused on the interaction between computers and human language.
-- **PV**: Photovoltaic – technology that converts sunlight directly into
-  electricity using solar cells.
-- **TTS**: Text-to-Speech – technology that converts written text into spoken
+- **PV**: [Photovoltaics](https://en.wikipedia.org/wiki/Photovoltaics) – technology that converts sunlight directly into electricity using solar cells.
+- **TTS**: [Text-to-Speech](https://en.wikipedia.org/wiki/Speech_synthesis) – technology that converts written text into spoken
   voice output.
-- **USD**: United States Dollar
+- **USD**: [United States Dollar](https://en.wikipedia.org/wiki/United_States_dollar) – the official currency of the United States and several other countries.
 
 
-# 🥚 Easter Eggs
+# 🥚 Lay Easter Eggs
 
 ## Tagline
 

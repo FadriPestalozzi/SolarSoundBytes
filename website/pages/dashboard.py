@@ -592,40 +592,54 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
     
     # --- TEXT GENERATION AND AUDIO ---
-    st.subheader("AI-Generated Market Pulse Report")
     
     # Get the actual date range from the slider
     start_month_str = months[start_idx] if start_idx < len(months) else "N/A"
     end_month_str = months[end_idx] if end_idx < len(months) else "N/A"
     st.write(f"**Analysis Period:** {start_month_str} to {end_month_str}")
     
-    try:
-        # Filter data for the selected period for text generation
-        filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
-        filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
-        
-        # Aggregate the filtered data for text generation
-        monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
-            mean_sentiment=('pos_score', 'mean'),
-            count=('correct_prob', 'count'),
-            std_sentiment=('correct_prob', 'std'),
-        ).reset_index()
-        
-        monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
-            mean_sentiment=('pos_score', 'mean'),
-            count=('correct_prob', 'count'),
-            std_sentiment=('correct_prob', 'std'),
-        ).reset_index()
-        
-        # Filter SP500 and energy data for the same period
-        filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
-        filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
-        
-        result_text = create_text_from_sent_analy_df(monthly_stats_twitter_text, monthly_stats_news_text, filtered_sp500_text, filtered_energy_text)
+    # Initialize session state for generated text
+    if 'generated_text' not in st.session_state:
+        st.session_state.generated_text = ""
+    
+    # Button to generate text report
+    if st.button("⚙️ Generate AI Report"):
+        try:
+            # Filter data for the selected period for text generation
+            filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
+            filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
+            
+            # Aggregate the filtered data for text generation
+            monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
+                mean_sentiment=('pos_score', 'mean'),
+                count=('correct_prob', 'count'),
+                std_sentiment=('correct_prob', 'std'),
+            ).reset_index()
+            
+            monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
+                mean_sentiment=('pos_score', 'mean'),
+                count=('correct_prob', 'count'),
+                std_sentiment=('correct_prob', 'std'),
+            ).reset_index()
+            
+            # Filter SP500 and energy data for the same period
+            filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
+            filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
+            
+            result_text = create_text_from_sent_analy_df(monthly_stats_twitter_text, monthly_stats_news_text, filtered_sp500_text, filtered_energy_text)
+            st.session_state.generated_text = result_text
+            st.success("✅ AI Report generated successfully!")
+        except Exception as e:
+            st.error(f"Error generating text: {str(e)}")
+            st.info("Text generation requires valid data for the selected time period.")
+    
+    # Display generated text and audio controls if text exists
+    if st.session_state.generated_text:
+        st.subheader("📝 AI-Generated Sentiment Analysis Report")
         st.write("**Generated Report:**")
-        st.write(result_text)
+        st.write(st.session_state.generated_text)
         
-        text = st.text_input(label='Edit the text if needed:', value=result_text)
+        text = st.text_input(label='Edit the text if needed:', value=st.session_state.generated_text)
         
         if st.button("🎧 Generate Audio"):
             if isinstance(text, str) and text.strip():
@@ -634,9 +648,6 @@ def main():
                 st.audio("output.mp3", format="audio/mp3")
             else:
                 st.warning("Text field is empty or invalid.")
-    except Exception as e:
-        st.error(f"Error generating text: {str(e)}")
-        st.info("Text generation requires valid data for the selected time period.")
 
     
 # Run the page
