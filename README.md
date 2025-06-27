@@ -327,4 +327,4 @@ To break down the complexity of this project, we created 2 taglines using either
 Now it's up to your human intuition to decide: 
 Which tagline was written by a human and which one is the figment of an AI agent? 
 
-Place your bets in [the TaglineTouringTest](https://github.com/FadriPestalozzi/SolarSoundBytes/discussions/27) to figure out, if your subconscious chose the blue pill (just NetFlix and Chill) or the red pill (Ready to Face the Terminator)!
+Place your bets in our [TaglineTouringTest](https://form.typeform.com/to/Pqtp10qL) to figure out, if your subconscious chose the blue pill (just NetFlix and Chill) or the red pill (Ready to Face the Terminator)!
