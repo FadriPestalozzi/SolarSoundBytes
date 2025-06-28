@@ -17,8 +17,8 @@ from shared_components import get_emoji_title, render_emoji_title_header, get_em
 
 def dashboard_info():
     """Display the main header and hero section"""
-    st.title("📊 interactive dashboard for you to")
-    st.title("🔎 discover the stories behind the data")
+    st.title("📊 Interactive Dashboard for You To")
+    st.title("🔎 Discover the Stories Behind the Data")
     # st.markdown("""
     #     **🔎 Discover the stories behind the data.** """)
     st.markdown("""
@@ -270,12 +270,12 @@ def main():
     )
 
     selected_metrics = st.sidebar.multiselect(
-        "Select metrics to overlay:",
+        "Select Metrics to Overlay:",
         options=['S&P 500', 'Installed Capacity Renewables'],
         default=[]
     )
 
-    show_animation = st.sidebar.checkbox("Animate monthly data", value=False)
+    show_animation = st.sidebar.checkbox("Animate Monthly Data", value=False)
 
 
     if selected_event and selected_event != "None":
@@ -325,7 +325,7 @@ def main():
         end_idx = min(len(months) - 1, end_idx)
     else:
         start_idx, end_idx = st.select_slider(
-            "Select monthly time window:",
+            "Select Monthly Time Window:",
             options=list(range(len(months))),
             value=(0, len(months)-1),
             format_func=lambda x: months[x]

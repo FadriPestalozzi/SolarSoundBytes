@@ -9,5 +9,5 @@ RUN pip install -r requirements.txt
 EXPOSE 8080
 
 # enable running locally using streamlit
-CMD ["sh", "-c", "streamlit run website/home.py --server.address 0.0.0.0 --server.port $PORT"]
+CMD ["sh", "-c", "streamlit run website/Home.py --server.address 0.0.0.0 --server.port $PORT"]
 

@@ -30,9 +30,9 @@ def render_limitations():
 
 def main():
     """Main function to run the page"""
-    st.set_page_config(page_title="challenges & wip @ ☀️🔊🍔", page_icon="🚧", layout="wide")
+    st.set_page_config(page_title="Challenges & WIP @ ☀️🔊🍔", page_icon="🚧", layout="wide")
     render_limitations()
     render_footer()
 
 if __name__ == "__main__":
-    main()
+    main() 

@@ -56,8 +56,8 @@ def render_footer():
     with text_col:
         st.markdown(f"""
             <div style="margin-top: 0px;">
-                <div style="font-size: 14px; margin-bottom: 2px; white-space: nowrap;">🚁 Lift-off as final project of our <a href="https://www.lewagon.com/barcelona/data-science-course" target="_blank">🥾 Le Wagon  Data Science Bootcamp</a> batch #2012 in 🏖️ Barcelona  </div>
-                <div style="font-size: 14px; margin-bottom: 2px; white-space: nowrap;">🫀 Created with love by the <a href="/about_us">{get_emoji_link_text()}</a> </div>
-                <div style="font-size: 14px; color: #666; white-space: nowrap;">💪 Please <a href="https://github.com/FadriPestalozzi/SolarSoundBytes/discussions/categories/ideas" target="_blank">🧠 tell us what you think</a> so we can reach for the 🚀 stars together</div>
+                <div style="font-size: 16px; margin-bottom: 2px; white-space: nowrap;">🚁 Lift-off as final project of our <a href="https://www.lewagon.com/barcelona/data-science-course" target="_blank">🥾 Le Wagon  Data Science Bootcamp</a> batch #2012 in 🏖️ Barcelona  </div>
+                <div style="font-size: 16px; margin-bottom: 2px; white-space: nowrap;">🫀 Created with love by the <a href="/about_us">{get_emoji_link_text()}</a> </div>
+                <div style="font-size: 16px; color: #666; white-space: nowrap;">💪 Please <a href="https://github.com/FadriPestalozzi/SolarSoundBytes/discussions/categories/ideas" target="_blank">🧠 tell us what you think</a> so we can reach for the 🚀 stars together</div>
             </div>
         """, unsafe_allow_html=True) 
