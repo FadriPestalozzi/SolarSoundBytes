@@ -255,7 +255,7 @@ def render_about_us():
             )
         with col_github:
             st.markdown(
-                f'<a href="https://github.com/SL14-SL14" target="_blank" class="github-button">'
+                f'<a href="https://github.com/SL14-SL" target="_blank" class="github-button">'
                 f'<img src="data:image/png;base64,{github_logo_base64}" class="github-logo" alt="GitHub">GitHub</a>',
                 unsafe_allow_html=True
             )
