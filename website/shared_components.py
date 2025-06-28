@@ -15,7 +15,7 @@ def get_emoji_title(include_team=False):
     """
     base_title = "☀️Solar🔊Sound🍔Bytes"
     if include_team:
-        return f"{base_title}🫂Team"
+        return f"{base_title}👥Team"
     return base_title
 
 def render_emoji_title_header(include_team=False, size="h1", center=True):

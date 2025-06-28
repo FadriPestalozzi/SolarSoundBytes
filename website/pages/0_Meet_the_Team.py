@@ -2,10 +2,21 @@ import streamlit as st
 from PIL import Image
 import sys
 import os
+import base64
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared_components import get_emoji_title, render_footer
 
+def get_base64_of_bin_file(bin_file):
+    """Convert binary file to base64 string"""
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
 def render_about_us():
+    # Load GitHub and LinkedIn logos as base64
+    github_logo_base64 = get_base64_of_bin_file('website/images/github_logo.png')
+    linkedin_logo_base64 = get_base64_of_bin_file('website/images/linkedin_logo.png')
+    
     # Custom CSS for better alignment and styling
     st.markdown("""
     <style>
@@ -79,14 +90,91 @@ def render_about_us():
         margin-bottom: 1rem;
     }
     
-    /* Custom styling for link buttons */
-    .stLinkButton > a {
+    /* Removed old stLinkButton styling - now using custom buttons for both LinkedIn and GitHub */
+    
+    /* Custom GitHub button styling to match LinkedIn buttons exactly */
+    .github-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         padding: 4px 8px !important;
+        background-color: transparent !important;
+        color: inherit !important;
+        text-decoration: none !important;
+        border-radius: 0.5rem !important;
         font-size: 14px !important;
+        font-weight: 400 !important;
+        font-family: "Source Sans Pro", sans-serif !important;
+        border: 1px solid rgba(49, 51, 63, 0.2) !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s, color 0.2s !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         white-space: nowrap !important;
         text-overflow: ellipsis !important;
-        width: 100% !important;
         text-align: center !important;
+        height: 38px !important;
+        line-height: 38px !important;
+        vertical-align: middle !important;
+    }
+    
+    .github-button:hover {
+        border-color: #ff4b4b !important;
+        color: #ff4b4b !important;
+        text-decoration: none !important;
+    }
+    
+    .github-logo {
+        width: 16px !important;
+        height: 16px !important;
+        margin-right: 6px !important;
+    }
+    
+    /* Force same exact styling for GitHub button text */
+    .github-button span, .github-button {
+        font-family: "Source Sans Pro", sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        letter-spacing: 0px !important;
+        line-height: 1.6 !important;
+    }
+    
+    /* Custom LinkedIn button styling to match GitHub buttons exactly */
+    .linkedin-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 4px 8px !important;
+        background-color: transparent !important;
+        color: inherit !important;
+        text-decoration: none !important;
+        border-radius: 0.5rem !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        font-family: "Source Sans Pro", sans-serif !important;
+        border: 1px solid rgba(49, 51, 63, 0.2) !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s, color 0.2s !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        text-align: center !important;
+        height: 38px !important;
+        line-height: 38px !important;
+        vertical-align: middle !important;
+    }
+    
+    .linkedin-button:hover {
+        border-color: #ff4b4b !important;
+        color: #ff4b4b !important;
+        text-decoration: none !important;
+    }
+    
+    .linkedin-logo {
+        width: 16px !important;
+        height: 16px !important;
+        margin-right: 6px !important;
     }
     
     /* Align footer section headers */
@@ -103,6 +191,20 @@ def render_about_us():
     .stats-section .emoji {
         font-size: 2rem !important;
     }
+    
+    /* Justify text in team member descriptions */
+    .stMarkdown p {
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        hyphens: auto !important;
+        line-height: 1.6 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Ensure consistent column width */
+    .element-container {
+        width: 100% !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -117,30 +219,46 @@ def render_about_us():
     with col1:
         st.markdown('<div class="team-name">Fadri Pestalozzi</div>', unsafe_allow_html=True)
         # st.subheader("Fadri Pestalozzi")
-        image = Image.open('website/images/Fadri.jpeg').resize((250, 250))
+        image = Image.open('website/images/Fadri.jpeg').resize((320, 320))
         st.image(image)
         st.write("Mechanical engineer turned software developer proficient in Python, SQL, and Odoo. After building a strong backend foundation, he's currently diving into ML/AI through community‑driven bootcamps and open-source events. Motivated by collaborative impact and continuous upskilling.")
         # link buttons
         col_linkedin, col_github = st.columns(2)
         with col_linkedin:
-            st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/fadri-pestalozzi/")
+            st.markdown(
+                f'<a href="https://www.linkedin.com/in/fadri-pestalozzi/" target="_blank" class="linkedin-button">'
+                f'<img src="data:image/png;base64,{linkedin_logo_base64}" class="linkedin-logo" alt="LinkedIn">LinkedIn</a>',
+                unsafe_allow_html=True
+            )
         with col_github:
-            st.link_button("🐙 GitHub", "https://github.com/FadriPestalozzi")
+            st.markdown(
+                f'<a href="https://github.com/FadriPestalozzi" target="_blank" class="github-button">'
+                f'<img src="data:image/png;base64,{github_logo_base64}" class="github-logo" alt="GitHub">GitHub</a>',
+                unsafe_allow_html=True
+            )
 
 
     # STEFFEN LAUTERBACH
     with col2:
         st.markdown('<div class="team-name">Steffen Lauterbach</div>', unsafe_allow_html=True)
         # st.subheader("Steffen Lauterbach")
-        image = Image.open('website/images/SteffenLauterbach.png').resize((250, 250))
+        image = Image.open('website/images/SteffenLauterbach.png').resize((320, 320))
         st.image(image)
         st.write("Renewable energy engineer and former research associate with deep experience in designing and optimizing clean energy systems. Passionate about bridging technical innovation with real-world impact. Committed to driving the next wave of green energy solutions.")
         # link buttons
         col_linkedin, col_github = st.columns(2)
         with col_linkedin:
-            st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/92-steffen-lauterbach/")
+            st.markdown(
+                f'<a href="https://www.linkedin.com/in/92-steffen-lauterbach/" target="_blank" class="linkedin-button">'
+                f'<img src="data:image/png;base64,{linkedin_logo_base64}" class="linkedin-logo" alt="LinkedIn">LinkedIn</a>',
+                unsafe_allow_html=True
+            )
         with col_github:
-            st.link_button("🐙 GitHub", "https://github.com/SL14-SL14")
+            st.markdown(
+                f'<a href="https://github.com/SL14-SL14" target="_blank" class="github-button">'
+                f'<img src="data:image/png;base64,{github_logo_base64}" class="github-logo" alt="GitHub">GitHub</a>',
+                unsafe_allow_html=True
+            )
 
     # ENRIQUE FLORES ROLDÁN
     with col3:
@@ -154,15 +272,23 @@ def render_about_us():
         right = left + size
         bottom = top + size
         image = image.crop((left, top, right, bottom))
-        image = image.resize((250, 250), Image.Resampling.LANCZOS)
+        image = image.resize((320, 320), Image.Resampling.LANCZOS)
         st.image(image)
         st.write("Video producer with 12 years of experience crafting visual storytelling across TV, advertising, and corporate media. Now pursuing a career shift into ML and AI to fuse creativity with cutting‑edge technology. Eager to apply narrative expertise in building intelligent, engaging solutions.")
         # link buttons
         col_linkedin, col_github = st.columns(2)
         with col_linkedin:
-            st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/enriqfr5/")
+            st.markdown(
+                f'<a href="https://www.linkedin.com/in/enriqfr5/" target="_blank" class="linkedin-button">'
+                f'<img src="data:image/png;base64,{linkedin_logo_base64}" class="linkedin-logo" alt="LinkedIn">LinkedIn</a>',
+                unsafe_allow_html=True
+            )
         with col_github:
-            st.link_button("🐙 GitHub", "https://github.com/EFRdev")
+            st.markdown(
+                f'<a href="https://github.com/EFRdev" target="_blank" class="github-button">'
+                f'<img src="data:image/png;base64,{github_logo_base64}" class="github-logo" alt="GitHub">GitHub</a>',
+                unsafe_allow_html=True
+            )
 
 
 def main():
