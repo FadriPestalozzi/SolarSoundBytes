@@ -3,10 +3,7 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from shared_components import get_emoji_title
-
-# Page config
-#st.set_page_config(page_title="About Us - SolarSoundBytes", layout="wide")
+from shared_components import get_emoji_title, render_footer
 
 def render_about_us():
     # Custom CSS for better alignment and styling
@@ -168,38 +165,11 @@ def render_about_us():
             st.link_button("🐙 GitHub", "https://github.com/EFRdev")
 
 
-    # Add some spacing and a footer section
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("---")
-
-    # Team stats or additional info
-    col_stats1, col_stats2, col_stats3 = st.columns(3, vertical_alignment='top')
-
-    with col_stats1:
-        st.markdown('<div class="stats-section">', unsafe_allow_html=True)
-        st.markdown('<h3><span class="emoji">🎓</span> Education</h3>', unsafe_allow_html=True)
-        st.markdown('<p style="text-align: left;">Le Wagon Data Science Bootcamp</p>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_stats2:
-        st.markdown('<div class="stats-section">', unsafe_allow_html=True)
-        st.markdown('<h3><span class="emoji">🌍</span> Based in</h3>', unsafe_allow_html=True)
-        st.markdown('<p style="text-align: left;">Barcelona</p>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_stats3:
-        st.markdown('<div class="stats-section">', unsafe_allow_html=True)
-        st.markdown('<h3><span class="emoji">🚀</span> Mission</h3>', unsafe_allow_html=True)
-        st.markdown('<p style="text-align: left;">AI-powered insights tracking the global shift to renewable energy</p>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
 def main():
-    """Main function for the about us page"""
-    # Set page config (must be first Streamlit command)
-    st.set_page_config(page_title="About Us - SolarSoundBytes", page_icon="👥", layout="wide")
+    """Main function to run the page"""
+    st.set_page_config(page_title="About Us @ ☀️🔊🍔", page_icon="👥", layout="wide")
     render_about_us()
+    render_footer()
 
 if __name__ == "__main__":
-    # Set page config (must be first Streamlit command)
-    st.set_page_config(page_title="About Us - SolarSoundBytes", page_icon="👥", layout="wide")
-    render_about_us()
+    main()

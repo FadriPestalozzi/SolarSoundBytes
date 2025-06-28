@@ -7,25 +7,18 @@ import seaborn as sns
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from shared_components import get_emoji_title
+from shared_components import get_emoji_title, render_footer
 
-def page_config():
-    """Configure the page settings"""
-    pass  # Page config is handled by the main app navigation
 
 def header_section():
     """Display the main header and hero section"""
-    st.title("🔧 Behind the Scenes")
-    st.markdown(f"### How we built {get_emoji_title()}: from raw data to AI-generated podcasts")
-    st.markdown("""
-        Welcome to our technical kitchen!</p>
-        """, unsafe_allow_html=True)
+    st.title("🔧 From Raw Data to Podcasts 🎧")
+    st.markdown(f"## Welcome to our {get_emoji_title()}🧑‍🍳Kitchen!")
     st.markdown("""
         Let us walk you through our journey of transforming years of
         public opinion, official news, market metrics, and historical events
         into a dynamic dashboard and time-traveling audio insights.
-        </p>
-        """, unsafe_allow_html=True)
+        """)
     st.markdown("---")
 
 ####----Data Research Tab----####
@@ -355,66 +348,18 @@ def main_tabs():
     with tab3:
         pipeline_tab()
 
-def whats_next_section():
-    """Display the What's Next section"""
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<h2 style='text-align: center;'>🎯 What's Next?</h2>", unsafe_allow_html=True)
-def navigation_buttons():
-    """Display navigation buttons"""
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-    with col2:
-        if st.button("🏠 Back to Home", use_container_width=True):
-            st.switch_page("home.py")
-    with col3:
-        if st.button("📊 Try Dashboard", use_container_width=True):
-            st.switch_page("pages/app.py")
-    with col4:
-        if st.button("🚀 Future Features", use_container_width=True):
-            st.switch_page("pages/upcoming.py")
 
-def footer_section():
-    """Display the footer with logo and credits"""
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    with col2:
-        try:
-            img_col, text_col = st.columns([1, 3])
-            with img_col:
-                st.image('website/images/LeWagonIcon.png', width=100)
-            with text_col:
-                st.markdown(
-                    """
-                    <div style="text-align: center;">
-                        <div>Created by Le Wagon Data Science Batch #2012</div>
-                        <div style="font-style: italic; margin-top: 8px;">
-                            Built with ❤️ by the {get_emoji_title(include_team=True)}
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-        except FileNotFoundError:
-            st.info("📷 Image not found")
 
 def render_behind_scenes():
     """Render function for importing into other pages"""
     header_section()
     main_tabs()
-    whats_next_section()
-    navigation_buttons()
-    footer_section()
+    render_footer()
 
 def main():
     """Main function to run the page"""
-    # Set page config (must be first Streamlit command)
-    st.set_page_config(page_title="Behind the Scenes - SolarSoundBytes", page_icon="🔧", layout="wide")
+    st.set_page_config(page_title="Behind the Scenes @ ☀️🔊🍔", page_icon="🔧", layout="wide")
     render_behind_scenes()
 
-# Run the page
 if __name__ == "__main__":
     main()
-else:
-    # This runs when imported
-    render_behind_scenes()

@@ -11,7 +11,7 @@ from solarsoundbytes.process_sp500_df import preprocess_sp500_df
 from solarsoundbytes.import_energy_data import get_energy_df
 from solarsoundbytes.text_creation.create_text import create_text_from_sent_analy_df
 from gtts import gTTS
-from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text
+from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 
 # ---- All dashboard.py functions below (copied verbatim for reuse) ----
 
@@ -187,9 +187,8 @@ def interactive_dashboard():
     
 
 # ---- main dashboard ----
-def main():    
-    # Set page config (must be first Streamlit command)
-    st.set_page_config(page_title="Dashboard - SolarSoundBytes", page_icon="📊", layout="wide")
+def main():   
+    st.set_page_config(page_title="Dashboard @ ☀️🔊🍔", page_icon="📊", layout="wide") 
     dashboard_info()
     interactive_dashboard()
 
@@ -639,21 +638,17 @@ def main():
         st.write("**Generated Report:**")
         st.write(st.session_state.generated_text)
         
-        text = st.text_input(label='Edit the text if needed:', value=st.session_state.generated_text)
-        
         if st.button("🎧 Generate Audio"):
-            if isinstance(text, str) and text.strip():
-                tts = gTTS(text.strip(), lang="en")
+            if isinstance(st.session_state.generated_text, str) and st.session_state.generated_text.strip():
+                tts = gTTS(st.session_state.generated_text.strip(), lang="en")
                 tts.save("output.mp3")
                 st.audio("output.mp3", format="audio/mp3")
             else:
-                st.warning("Text field is empty or invalid.")
+                st.warning("Generated text is empty or invalid.")
+
+    render_footer()
 
     
-# Run the page
 if __name__ == "__main__":
     main()
-else:
-    # This runs when imported
-    interactive_dashboard()
 
