@@ -3,7 +3,6 @@ FROM python:3.10.6-buster
 COPY . . 
 
 RUN pip install --upgrade pip
-RUN pip install -e .
 RUN pip install -r requirements.txt
 
 # expose port for deployment to access by railway.com
