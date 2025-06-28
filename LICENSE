@@ -1,16 +1,29 @@
-MIT License
+Non-Commercial License
 
 Copyright (c) 2025 FadriPestalozzi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, merge, publish, distribute, and/or redistribute copies of the 
+Software for NON-COMMERCIAL purposes only, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+COMMERCIAL USE PROHIBITION:
+The Software may NOT be used for commercial purposes. Commercial use includes,
+but is not limited to, selling the Software or derivatives of it, using the Software to generate revenue in any form, or using the Software for profit-generating activities. Non-profit organizations, NGOs, and businesses using the Software for non-profit purposes are permitted.
+
+ATTRIBUTION AND LICENSE PRESERVATION:
+1. The above copyright notice and this license must be included in all copies
+   or substantial portions of the Software.
+2. Any redistribution must clearly credit the original authors.
+3. This license must remain unchanged and must accompany any redistribution.
+4. Any modifications to the Software must be clearly documented.
+
+REDISTRIBUTION RIGHTS:
+You may redistribute the Software under the same license terms, provided that:
+- The redistribution is for non-commercial purposes only
+- Proper attribution is given to the original authors
+- This license is included with the redistribution
+- Any changes made to the original Software are documented
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -19,3 +32,5 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+This Software must remain free and cannot be used for commercial purposes.
