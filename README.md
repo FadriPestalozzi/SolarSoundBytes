@@ -1,16 +1,16 @@
 # Table of Contents
-
 - [📖 Get an Overview](#-get-an-overview)
 - [👥 Meet the Core Team](#-meet-the-core-team)
-- [📊 Gather Data](#-gather-data)
+- [📊 Gather and Process Data](#-gather-and-process-data)
 - [🌍 Identify Global Events](#-identify-global-events)
-- [⚙️ Process Data](#️-process-data)
-- [🔧 How to Install](#-how-to-install)
+- [🎭 Sentiment Analysis using DistilBERT](#-sentiment-analysis-using-distilbert)
+- [🎉 Now it's Your Turn to Play!](#-now-its-your-turn-to-play)
+- [🛠️ How to Contribute](#️-how-to-contribute)
 - [📚 List Acronyms](#-list-acronyms)
 
 # 📖 Get an Overview
 
-[**SolarSoundBytes**](https://solar-sound-bytes.up.railway.app/) is a data-driven machine-learning project that explores the global sentiment towards **renewable energy** and **energy storage** in the timeframe from 2022-01-02 to 2024-12-24.
+[**SolarSoundBytes**](https://solar-sound-bytes.app/) is a data-driven machine-learning project that explores the global sentiment towards **renewable energy** and **energy storage** in the timeframe from 2022-01-02 to 2024-12-24.
 
 This project is a real-world application of the learnings acquired
 during a [9-week bootcamp at Le Wagon](https://www.lewagon.com/barcelona/data-science-course) and was created during [our](#-core-team) final 2 weeks together in Barcelona from June 2 to 13, 2025.
@@ -23,7 +23,7 @@ Sentiment analysis is a well-known Natural Language Processing (NLP) technique u
 - The sentiment of the general public is being inferred by performing sentiment analysis on **130k+ tweets (TODO link to dataset description)**. 
 - Analogously, the sentiment of official channels is derived by sentiment analysis on **4k+ news articles (TODO link to dataset description)**. 
 
-By feeding the sentiment analysis results of these 2 datasets into an [interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard), the user is empowered to perform an independent investigation and identify possible correlations between public and official sentiments as well as compare those sentiments with additional metrics. 
+By feeding the sentiment analysis results of these 2 datasets into an [interactive dashboard](https://solar-sound-bytes.app/dashboard), the user is empowered to perform an independent investigation and identify possible correlations between public and official sentiments as well as compare those sentiments with additional metrics. 
 
 ## Input: Additional Metrics
 
@@ -35,7 +35,7 @@ So far, two additional metrics have been implemented, which can be optionally ov
 
 ## Output: SoundBytes
 
-To draw your own conclusions regarding the ongoing energy transition, you can play with our extensive dataset using an [interactive dashboard](https://solar-sound-bytes.up.railway.app/dashboard).
+To draw your own conclusions regarding the ongoing energy transition, you can play with our extensive dataset using an [interactive dashboard](https://solar-sound-bytes.app/dashboard).
 
 Users can pick any combination of data streams for a specific time period to generate custom audio reports, making the complex and multi-layered topic of energy transition accessible to everyone. Based on the user-defined timeframe of [sentiment analysis results](#input-sentiment-analysis) and optional [additional metrics](#input-additional-metrics), turned on or off by the user, the user can trigger the generation of an AI report.
 
@@ -52,9 +52,10 @@ A SoundByte is a short audio summary which turns the chosen data range into a si
 | Steffen Lauterbach    | [@steffenlaut](https://github.com/steffenlaut)         | System Architect | Create model pipeline and docker container to expose API // Research and process satellite images to detect and quantify solar panels //Integrate TTS (text-to-sound) |
 | Enrique Flores Roldán | [@efloresr](https://github.com/efloresr)               | Project Manager  | News Articles: Research data sources // Create data processing pipeline, and tested models for NLP. // Fine tune distilber model for sentiment analysis.              |
 
-# 📊 Gather Data
+# 📊 Gather and Process Data
 
-## News Articles from Cleantech Media Dataset
+
+## News Articles
 
 Online research for datasets of news-articles in the field of renewable energy technologies led us to the [Cleantech Media Dataset by Anacode](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
 
@@ -64,68 +65,41 @@ Online research for datasets of news-articles in the field of renewable energy t
   - 12,966 articles without a date. 2.5K Dates extracted from urls
   - **9,938** working articles (Europe only) (for MVP)
 
-## **Training, Test & Evaluate**
+### Model Evaluation
 
-- Tested different models for sentiment analysis.
-  - [**distilbert-base-uncased-finetuned-sst-2-english**](https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english)
-    — Pos/Neg ONLY \*\*\*
-  - [**cardiffnlp/twitter-roberta-base-sentiment-latest**](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest)
-    — Pos/Neg/Netural
-  - [**nlptown/bert-base-multilingual-uncased-sentiment**](https://huggingface.co/nlptown/bert-base-multilingual-uncased-sentiment)
-    -- Optimized for reviews
-  - [**Gemma 3**](https://huggingface.co/google/gemma-3-27b-it) — \*\*\*
-- **First trial:** Very inaccurate — try again without too much preprocessing.
-- **Second trial:** Still inaccurate — Analyse in sentences instead of entire
-  article??? — divide data into chunks!
-- **Third trial:** Still inaccurate — decided to fine tune a new model...
+Tested different models for sentiment analysis.
 
-**\***GEMMA - VertexAI\*\*
+- [**distilbert-base-uncased-finetuned-sst-2-english**](https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english)
+  — Pos/Neg (no neutral)
+- [**cardiffnlp/twitter-roberta-base-sentiment-latest**](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest)
+  — Pos/Neg/Netural
+- [**nlptown/bert-base-multilingual-uncased-sentiment**](https://huggingface.co/nlptown/bert-base-multilingual-uncased-sentiment)
+  — Optimized for reviews
+- [**Gemma 3**](https://huggingface.co/google/gemma-3-27b-it) — Large language model for instruction following
 
-- **Vertex AI SDK for Generative AI fine-tuning (Gemma models)** evolves very
-  fast and the API keeps changing.
-- Key methods like **fine_tune()** or **tune_model()** were either **missing,
-  deprecated, or moved** to other parts of the library in different SDK
-  versions.
-- The **GenerativeModel.fine_tune()** method was not stable or consistently
-  available, even after trying different setups (with Cloud Shell and pip
-  installs).
-- **Gemma is a chat / instruction-following model, not a task-specific model
-  like DistilBERT or RoBERTa.**
-- The new/recommended way to fine-tune Gemma now uses a **helper method** like
-  aiplatform.model_garden.models.fine_tune_gemma(), which I started to implement
-  but needed to refactore my code and so I decided to pivot.
-- DIDN’T WORK —- MOVE ON!
 
-## **Fine Tuning and Predict**
+### Gemma 3 Fine-tuning Challenges with Vertex AI
 
-**\***Recommended model =
-["distilbert/distilbert-base-uncased](https://huggingface.co/distilbert/distilbert-base-uncased)"\*\*
+The Vertex AI Software Development Kit (SDK) for Generative AI fine-tuning with Gemma models presented significant technical obstacles:
 
-- Trained with labeled data and recommended model:
-  - [_\*\*NewsArticles_ForTraining_](https://www.kaggle.com/datasets/clovisdalmolinvieira/news-sentiment-analysis)
-    Dataset:\*\*
-    - Dataset for training (no topic in specific)
-    - **3.5K** news articles - labeled
-  - **model = "distilbert/distilbert-base-uncased"**
-    - Fine tuned with 3.5K articles labeled: Pos/Neg/Neut
-    - Run a 1st test and score was bad:
-      - loss:0.627
-      - accuracy 0.782
-    - Tweaked the parameters and run a 2nd test
-      - loss = 0.37
-      - accuracy = 0.796
+- **Rapid API evolution:** The SDK changes frequently, making stable implementation difficult
+- **Method instability:** Core methods like `fine_tune()` and `tune_model()` were either missing, deprecated, or relocated across different SDK versions
+- **Inconsistent availability:** The `GenerativeModel.fine_tune()` method proved unreliable across different environments (Cloud Shell and pip installations)
+- **Model architecture mismatch:** Gemma 3 is designed for chat and instruction-following tasks, not specialized sentiment analysis like DistilBERT or RoBERTa
+- **Implementation complexity:** The recommended approach using helper methods like `aiplatform.model_garden.models.fine_tune_gemma()` requires significant code refactoring
 
-## Conclusion:
+Despite progressively simplifying the approach from heavy preprocessing to reduced preprocessing and finally attempting sentence-level analysis by chunking articles, Gemma 3 consistently delivered poor accuracy, leading to its abandonment in favor of fine-tuning a different model.
 
-- Pre-trained sentiment models performed poorly on CleanTech news articles.
-- Tried advanced models (DistilBERT, Twitter-RoBERTa, Gemma); accuracy remained
-  low or workflow too complex.
-- Fine-tuning Gemma on Vertex AI failed due to unstable SDK APIs and . Also,
-  **Gemma 3** is optimised for chat / instruction-following.
-- Pivoted to fine-tuning **DistilBERT-base** with 3.5K labeled articles.
-- Achieved ~0.80 accuracy after tuning.
-- Conclusion: **Domain-specific fine-tuning is required** for reliable sentiment
-  analysis on niche topics like CleanTech.
+
+### Fine Tuning and Predict
+
+The recommended model for this task was the [distilbert/distilbert-base-uncased](https://huggingface.co/distilbert/distilbert-base-uncased). We trained this model using labeled data from the [NewsArticles_ForTraining](https://www.kaggle.com/datasets/clovisdalmolinvieira/news-sentiment-analysis) dataset, which contains 3.5K news articles with sentiment labels covering various topics. 
+
+We fine-tuned the distilbert/distilbert-base-uncased model with these 3.5K articles labeled as Positive, Negative, or Neutral. The initial test results were disappointing, with a loss of 0.627 and accuracy of 0.782. After adjusting the hyperparameters and running a second test, we achieved significantly better performance with a loss of 0.37 (lower loss is better) and accuracy of 0.796.
+
+### Conclusion
+Pre-trained sentiment models performed poorly on CleanTech news articles. We tried advanced models including DistilBERT, Twitter-RoBERTa, and Gemma, but accuracy remained low and the workflow complexity did not fit into our tight schedule to deliver an MVP within 2 weeks. Fine-tuning Gemma on Vertex AI failed due to unstable SDK APIs. Gemma 3 is optimised for chat and instruction-following tasks. We pivoted to fine-tuning DistilBERT-base with 3.5K labeled articles and achieved approximately 0.80 accuracy after tuning. Our conclusion is that domain-specific fine-tuning is required for reliable sentiment analysis on niche topics like CleanTech.
+
 
 ## Social Media Data from Twitter
 
@@ -157,9 +131,7 @@ Rehydration was performed in chunks of up to 10k tweets. As shown in below table
 
 To compile a twitter dataset covering the same topics as covered by the [Cleantech Media Dataset](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset), the [unique values in the cleantech "domains" column](preprocessing/scraping/cleantech_articles__unique_domains.txt) are used as scraping query terms with the chosen [twitter scraper](https://console.apify.com/actors/CJdippxWmn9uRfooo).
 
-To work with a user-friendly scraping GUI while keeping scraping costs below 40 USD/month, the following scraper was chosen:
-
-- [Tweet Scraper|$0.25/1K Tweets | Pay-Per Result | No Rate Limits](https://console.apify.com/actors/CJdippxWmn9uRfooo/input?addFromActorId=CJdippxWmn9uRfooo).
+To work with a user-friendly scraping GUI while keeping scraping costs below 40 USD/month, the following scraper was chosen: [Tweet Scraper|$0.25/1K Tweets | Pay-Per Result | No Rate Limits](https://console.apify.com/actors/CJdippxWmn9uRfooo/input?addFromActorId=CJdippxWmn9uRfooo).
 
 Unfortunately, this chosen scraping method was unable to handle more than 2 search terms simultaneously. 
 Attempts to use more than 2 search terms led to the scraper ignoring the time window, thus always returning the most recent results. 
@@ -174,7 +146,7 @@ Therefore, the [initial list of search terms](preprocessing/scraping/cleantech_a
 
 # 🌍 Identify Global Events
 
-To identify specific dates around which to refine our twitter dataset, i.e. to zoom
+To identify specific dates around which to refine our twitter dataset, i.e. to allow us to zoom
 into global events where a significant change in sentiment is highly probable, a
 [deep research was performed by iteratively prompting ChatGPT 4.1](https://chatgpt.com/share/68495bc3-ee6c-8006-9816-8b0480a0bf3c).
 
@@ -197,22 +169,29 @@ references and reasoning, see the
 | 2023-11-30   | [Global installed solar PV capacity surpasses 1 terawatt milestone](https://www.pv-magazine.com/2023/11/30/global-installed-solar-capacity-surpasses-1-tw/)                                                        | Global         | Positive sentiment, milestone for solar industry      |
 
 
+# 🎭 Sentiment Analysis using DistilBERT
 
-# ⚙️ Process Data
-
-## Sentiment Analysis
-
-### Methods
+Raw data gathered from news articles and twitter is converted into sentiments (positive or negative) with a corresponding confidence score between 0.0 and 1.0. 
 
 <img src="images/svg/sentiment_analysis_twitter_and_news.excalidraw.svg" alt="sentiment_analysis_twitter_and_news" width="500"/>
 
-### Results
-
-TODO-sample-screenshots-of-dashboard-results
 
 
+# 🎉 Now it's Your Turn to Play!
 
-# 🔧 How to Install
+After gathering this treasure chest of data, it's up to you, dear user, to now play with our 📊 [interactive dashboard](https://solar-sound-bytes.app/dashboard) so you can 🔎 discover the stories hidden behind layers of raw data. Good luck 🚀
+
+
+
+
+
+
+
+# 🛠️ How to Contribute
+
+If you're also super excited about [☀️Solar🔊Sound🍔Bytes](https://solar-sound-bytes.app/), here's how you can support our research effort! 
+
+Thank you for sharing your time and energy with us 🫀
 
 ## clone this repo to your computer
 
@@ -224,8 +203,7 @@ git clone <paste_your_SSH_link_here>
 
 ## create virtual python environment
 
-Separate local development environment from your global python environment to
-define specific packages and versions.
+It's good practice to create a separate development environment to prevent growing your global python environment into a cluttered mess. 
 
 ```shell
 # navigate into the cloned project folder
@@ -242,11 +220,16 @@ pyenv local SolarSoundBytes
 
 ## install requirements
 
+To install the required packages and their versions, run the command below.
+
 ```shell
 pip install -r requirements.txt
 ```
 
-## create data folder (untracked by .gitignore) and request data access from one of the authors
+## data folder (optional) 
+
+In case you're in the mood to play around with additional data, you can place that into a corresponding data/ folder, already in .gitignore. 
+
 
 ```shell
 mkdir data
@@ -264,6 +247,7 @@ mkdir data
 - **NLP**: [Natural Language Processing](https://en.wikipedia.org/wiki/Natural_language_processing) – a field of artificial intelligence
   focused on the interaction between computers and human language.
 - **PV**: [Photovoltaics](https://en.wikipedia.org/wiki/Photovoltaics) – technology that converts sunlight directly into electricity using solar cells.
+- **SDK**: [Software Development Kit](https://en.wikipedia.org/wiki/Software_development_kit) – a collection of software development tools and libraries that allows developers to create applications for a specific platform or framework.
 - **TTS**: [Text-to-Speech](https://en.wikipedia.org/wiki/Speech_synthesis) – technology that converts written text into spoken
   voice output.
 - **USD**: [United States Dollar](https://en.wikipedia.org/wiki/United_States_dollar) – the official currency of the United States and several other countries.
