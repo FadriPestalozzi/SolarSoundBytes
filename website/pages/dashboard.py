@@ -5,11 +5,11 @@ import plotly.graph_objects as go2
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from solarsoundbytes.import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
-from solarsoundbytes.import_newsarticle_sent_analysis import create_df_of_newsarticle_result
-from solarsoundbytes.process_sp500_df import preprocess_sp500_df
-from solarsoundbytes.import_energy_data import get_energy_df
-from solarsoundbytes.text_creation.create_text import create_text_from_sent_analy_df
+from data_analysis.import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
+from data_analysis.import_newsarticle_sent_analysis import create_df_of_newsarticle_result
+from data_analysis.process_sp500_df import preprocess_sp500_df
+from data_analysis.import_energy_data import get_energy_df
+from data_analysis.text_creation.create_text import create_text_from_sent_analy_df
 from gtts import gTTS
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 
@@ -23,8 +23,7 @@ def dashboard_info():
     #     **🔎 Discover the stories behind the data.** """)
     st.markdown("""
     Navigate through our sentiment analysis dashboard to explore how public opinion from ***tweets and official news***
-    correlates with renewable energy indicators ***(S&P 500)*** performance and the actual capacity growth
-    ***([Ember's Monthly Wind and Solar Capacity Data](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/))***. Then scroll down for your custom market pulse report - available in both text and audio format.""")
+    correlates with [S&P 500 as economic indicator](https://www.investing.com/indices/us-spx-500-historical-data) and the [installed solar and wind capacity](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/). Scroll down to generate your custom report (text and audio) based on the data you chose to plot.""")
     st.markdown("---")
 
 def interactive_dashboard():
@@ -264,11 +263,20 @@ def main():
     """)
 
     months = df['month'].dt.strftime('%Y-%m').unique()
-    st.sidebar.header("Event Selection")
+    
     selected_event = st.sidebar.selectbox(
         "Select Global Event:",
         options=["None"] + [f"{date.strftime('%Y-%m-%d')} {event}" for event, date in EVENT_DATES.items()]
     )
+
+    selected_metrics = st.sidebar.multiselect(
+        "Select metrics to overlay:",
+        options=['S&P 500', 'Installed Capacity Renewables'],
+        default=[]
+    )
+
+    show_animation = st.sidebar.checkbox("Animate monthly data", value=False)
+
 
     if selected_event and selected_event != "None":
         event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
@@ -284,7 +292,7 @@ def main():
         df_twitter_filtered['hour'] = df_twitter_filtered['date'].dt.to_period('H').dt.to_timestamp()
         df_twitter_filtered['correct_prob'] = df_twitter_filtered[['pos_score', 'neg_score']].max(axis=1)
         
-        # Aggregate Twitter by hour for events (like in events/z_event_russia.py)
+        # Aggregate Twitter by hour for events
         hourly_stats_twitter = df_twitter_filtered.groupby('hour').agg(
             mean_sentiment=('pos_score', 'mean'),
             count=('correct_prob', 'count'),
@@ -331,14 +339,6 @@ def main():
             df_window[df_window['source'] == 'tweet']['month'].unique().tolist()
         ))
 
-    st.sidebar.header("Animation Controls")
-    show_animation = st.sidebar.checkbox("Show animation (month by month)", value=False)
-    st.sidebar.header("Metric Overlays")
-    selected_metrics = st.sidebar.multiselect(
-        "Select metrics to overlay:",
-        options=['S&P 500', 'Installed Capacity Renewables'],
-        default=[]
-    )
 
     monthly_sp500 = preprocess_sp500_df()
     df_energy = get_energy_df()
