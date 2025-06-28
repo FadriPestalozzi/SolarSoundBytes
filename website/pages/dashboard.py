@@ -17,8 +17,8 @@ from shared_components import get_emoji_title, render_emoji_title_header, get_em
 
 def dashboard_info():
     """Display the main header and hero section"""
-    st.title("📊 interactive dashboard for you ❤️")
-    st.title("🔎 to discover the stories behind the data 🚀")
+    st.title("📊 interactive dashboard for you to")
+    st.title("🔎 discover the stories behind the data")
     # st.markdown("""
     #     **🔎 Discover the stories behind the data.** """)
     st.markdown("""
@@ -601,6 +601,34 @@ def main():
     if 'generated_text' not in st.session_state:
         st.session_state.generated_text = ""
     
+    # Show what will be included in the report
+    st.subheader("📋 AI Report Configuration")
+    st.write("**Time Period:** {} to {}".format(months[start_idx], months[end_idx]))
+    
+    if selected_metrics:
+        st.write("**📊 Metrics to include:**")
+        for metric in selected_metrics:
+            st.write(f"  • {metric}")
+    else:
+        st.write("**📊 Metrics:** Only sentiment data (no economic/capacity metrics selected)")
+    
+    # Show relevant events
+    start_date_preview = pd.to_datetime(months[start_idx])
+    end_date_preview = pd.to_datetime(months[end_idx])
+    preview_events = []
+    
+    for event_name, event_date_str in GLOBAL_EVENTS.items():
+        event_date = pd.to_datetime(event_date_str)
+        if start_date_preview <= event_date <= end_date_preview:
+            preview_events.append(f"{event_date_str}: {event_name}")
+    
+    if preview_events:
+        st.write("**🌍 Global events in this period:**")
+        for event in preview_events:
+            st.write(f"  • {event}")
+    else:
+        st.write("**🌍 Global events:** No major events in selected timeframe")
+    
     # Button to generate text report
     if st.button("⚙️ Generate AI Report"):
         try:
@@ -621,13 +649,46 @@ def main():
                 std_sentiment=('correct_prob', 'std'),
             ).reset_index()
             
-            # Filter SP500 and energy data for the same period
-            filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
-            filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
+            # Only include metrics data if they are selected for display
+            filtered_sp500_text = pd.DataFrame()  # Empty by default
+            filtered_energy_text = pd.DataFrame()  # Empty by default
             
-            result_text = create_text_from_sent_analy_df(monthly_stats_twitter_text, monthly_stats_news_text, filtered_sp500_text, filtered_energy_text)
+            if 'S&P 500' in selected_metrics:
+                filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
+            
+            if 'Installed Capacity Renewables' in selected_metrics:
+                filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
+            
+            # Filter events that fall within the selected timeframe
+            start_date_period = pd.to_datetime(months[start_idx])
+            end_date_period = pd.to_datetime(months[end_idx])
+            relevant_events = []
+            
+            for event_name, event_date_str in GLOBAL_EVENTS.items():
+                event_date = pd.to_datetime(event_date_str)
+                if start_date_period <= event_date <= end_date_period:
+                    relevant_events.append(f"{event_date_str} {event_name}")
+            
+            result_text = create_text_from_sent_analy_df(
+                monthly_stats_twitter_text, 
+                monthly_stats_news_text, 
+                filtered_sp500_text, 
+                filtered_energy_text,
+                selected_metrics,
+                relevant_events
+            )
             st.session_state.generated_text = result_text
-            st.success("✅ AI Report generated successfully!")
+            
+            # Show summary of what was included
+            included_data = ["Twitter sentiment", "News sentiment"]
+            if 'S&P 500' in selected_metrics and not filtered_sp500_text.empty:
+                included_data.append("S&P 500 performance")
+            if 'Installed Capacity Renewables' in selected_metrics and not filtered_energy_text.empty:
+                included_data.append("Renewable capacity data")
+            
+            st.success(f"✅ AI Report generated successfully! Included: {', '.join(included_data)}")
+            if relevant_events:
+                st.info(f"📅 Analyzed {len(relevant_events)} event(s) in the selected timeframe")
         except Exception as e:
             st.error(f"Error generating text: {str(e)}")
             st.info("Text generation requires valid data for the selected time period.")
