@@ -29,8 +29,8 @@ By feeding the sentiment analysis results of these 2 datasets into an [interacti
 
 So far, two additional metrics have been implemented, which can be optionally overlaid to compare with sentiments during the same timeframe from 2022-01-02 to 2024-12-24. 
 
-1. Global capacity of renewable energy and energy storage technologies (TODO LINK AND NAME OF RENEWABLES DATASET). 
-2. S&P 500 (TODO LINK AND NAME OF ECONOMIC DATASET)
+1. Renewables Dataset: [Global capacity of renewable energy technologies, solar and wind](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/)
+2. Economic Dataset: [S&P 500 Historical Data downloaded on 2025-06-12 from investing.com](https://www.investing.com/indices/us-spx-500-historical-data)
 
 
 ## Output: SoundBytes
