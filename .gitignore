@@ -6,15 +6,10 @@
 .python-version
 
 # folders
-__pycache__/
-build/
 data/
-solarsoundbytes.egg-info/
-solarsoundbytes/api/__pycache__/
-*data_test/
-.streamlit/
 website/.streamlit/
 
+# SoundByte
 *.mp3
 
 # chaching
