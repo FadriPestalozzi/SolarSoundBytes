@@ -293,7 +293,7 @@ def render_about_us():
 
 def main():
     """Main function to run the page"""
-    st.set_page_config(page_title="About Us @ ☀️🔊🍔", page_icon="👥", layout="wide")
+    st.set_page_config(page_title="Meet the Team @ ☀️🔊🍔", page_icon="👥", layout="wide")
     render_about_us()
     render_footer()
 

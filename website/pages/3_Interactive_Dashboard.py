@@ -187,7 +187,7 @@ def interactive_dashboard():
 
 # ---- main dashboard ----
 def main():   
-    st.set_page_config(page_title="Dashboard @ ☀️🔊🍔", page_icon="📊", layout="wide") 
+    st.set_page_config(page_title="Interactive Dashboard @ ☀️🔊🍔", page_icon="📊", layout="wide") 
     dashboard_info()
     interactive_dashboard()
 

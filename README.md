@@ -179,7 +179,7 @@ Raw data gathered from news articles and twitter is converted into sentiments (p
 
 # 🎉 Now it's Your Turn to Play!
 
-After gathering this treasure chest of data, it's up to you, dear user, to now play with our 📊 [interactive dashboard](https://solar-sound-bytes.app/dashboard) so you can 🔎 discover the stories hidden behind layers of raw data. Good luck 🚀
+After gathering this treasure chest of data it's up to you, dear user, to now play with our 📊 [interactive dashboard](https://solar-sound-bytes.app/dashboard) so you can 🔎 discover the stories hidden behind layers of raw data. Good luck 🚀
 
 
 
