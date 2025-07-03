@@ -4,7 +4,6 @@ import os
 from openai import OpenAI
 
 load_dotenv()
-# api_key = os.getenv("API_KEY")
 
 api_key = os.getenv("API_KEY")
 
