@@ -193,6 +193,12 @@ If you're also super excited about [☀️Solar🔊Sound🍔Bytes](https://solar
 
 Thank you for sharing your time and energy with us 🫀
 
+## Gitpod Online IDE
+
+You can open this project in a preconfigured Gitpod online IDE and edit, run, test, debug and commit directly from your browser.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/FadriPestalozzi/SolarSoundBytes)
+
 ## clone this repo to your computer
 
 ```shell

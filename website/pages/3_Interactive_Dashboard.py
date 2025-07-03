@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import plotly.graph_objects as go2
 import pandas as pd
 import numpy as np
+import os
 from datetime import datetime, timedelta
 from data_analysis.import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
 from data_analysis.import_newsarticle_sent_analysis import create_df_of_newsarticle_result
@@ -28,26 +29,6 @@ def dashboard_info():
 
 def interactive_dashboard():
     """Content for Dashboard page"""
-    import os
-    
-    # Try multiple methods to get the API key
-    api_key_from_secrets = None
-    
-    # Method 1: Try secrets.toml
-    try:
-        api_key_from_secrets = st.secrets["OPENAI_API_KEY"]
-    except (KeyError, FileNotFoundError):
-        pass
-    
-    # Method 2: Try environment variable
-    if not api_key_from_secrets:
-        api_key_from_secrets = os.getenv("OPENAI_API_KEY")
-    
-    # Method 3: Check if no API key found
-    if not api_key_from_secrets:
-        st.error("Error: OpenAI API Key not found")
-        st.info("Please set your OPENAI_API_KEY in .streamlit/secrets.toml or as an environment variable.")
-        st.stop()
 
     # --- DATA SOURCE ---
     df_twitter = create_df_of_twitter_result()
@@ -141,6 +122,7 @@ def interactive_dashboard():
                 orientation='h',
                 len=0.5
             ),
+            opacity=0.5,
         ),
         name='News Sentiment',
         yaxis='y3',
@@ -628,9 +610,26 @@ def main():
             st.write(f"  • {event}")
     else:
         st.write("**🌍 Global events:** No major events in selected timeframe")
+        
+    # Try multiple methods to get the API key
+    api_key_from_secrets = None
     
+    # Method 1: Try secrets.toml
+    try:
+        api_key_from_secrets = st.secrets["OPENAI_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        pass
+    
+    # Method 2: Try environment variable
+    if not api_key_from_secrets:
+        api_key_from_secrets = os.getenv("OPENAI_API_KEY")
+    
+    # Method 3: Check if no API key found
+    if not api_key_from_secrets:
+        st.warning("OpenAI API Key not found. To generate AI report, please set your OPENAI_API_KEY in .streamlit/secrets.toml or as an environment variable.")
+
     # Button to generate text report
-    if st.button("⚙️ Generate AI Report"):
+    elif st.button("⚙️ Generate AI Report"):
         try:
             # Filter data for the selected period for text generation
             filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
