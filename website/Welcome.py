@@ -24,6 +24,22 @@ def main():
         content_container = st.container()
         
         with content_container:
+            # What can you do with this tool?
+            st.markdown("<h4>🔍 What can you do with this tool?</h4>", unsafe_allow_html=True)
+            st.markdown("""
+            Ever wondered what people really think about solar panels and wind turbines? 
+            And how official news coverage compares to the attitude of the general public? 
+            This tool lets you dive into the world of renewable energy sentiment - no technical knowledge required!
+
+            Using Natural Language Processing (NLP), we analyzed Twitter conversations and official news articles for you to visualize trends in public opinion and media coverage around renewable energy.  
+            We also compared these trends with key renewable energy indicators including S&P 500 market performance and 
+            Ember's Monthly Wind and Solar Capacity Data, all during the same timeframe from 2022-01-02 to 2024-12-24.
+
+            You can explore how public sentiment around renewable energy and energy storage evolves from 2022 to 2024. 
+            Compare these trends with key renewable energy indicators including S&P 500 market performance and 
+            Ember's Monthly Wind and Solar Capacity Data, all during the same timeframe from 2022-01-02 to 2024-12-24.
+            """)
+
             # Why was this tool created?
             st.markdown("<h4>🎯 Why was this tool created?</h4>", unsafe_allow_html=True)
             st.markdown("""
@@ -45,15 +61,6 @@ def main():
             3. Create tools for you to visualize sentiment trends and correlations with additional data, generate AI-driven summaries, and finally export your insights as audio SoundBytes, i.e. create your own podcast on this hot topic 🔥
             """)
 
-            # What can you do with this tool?
-            st.markdown("<h4>🔍 What can you do with this tool?</h4>", unsafe_allow_html=True)
-            st.markdown("""
-            Explore how public sentiment around renewable energy and energy storage evolves from 2022 to 2024. 
-            Compare these trends with key renewable energy indicators including S&P 500 market performance and 
-            Ember's Monthly Wind and Solar Capacity Data, all during the same timeframe from 2022-01-02 to 2024-12-24.
-            
-            Using Natural Language Processing (NLP), we analyzed Twitter conversations and official news articles to visualize trends in public opinion and media coverage around renewable energy.  
-            """)
             
         # Render the reusable footer
         render_footer()
