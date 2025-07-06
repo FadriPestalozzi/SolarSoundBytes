@@ -6,57 +6,75 @@ import time
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 
 def main():
+    # What is SolarSoundBytes?
     """Main function for the welcome page"""
     st.set_page_config(page_title="SolarSoundBytes = ☀️🔊🍔", page_icon="🤗", layout="wide")
 
-    st.markdown(f"<h1 style='text-align: center'>What is {get_emoji_title()}?</h1>", unsafe_allow_html=True)
-    st.markdown(f"The {get_emoji_title()}🚀Project explores global sentiment towards renewable energy through interactive visualizations and AI-generated audio summaries.")
+    st.markdown(f"<h1 style='text-align: center'>What are {get_emoji_title()}?</h1>", unsafe_allow_html=True)
+
+    st.markdown(f"""
+    • Ever wondered what people really think about solar panels and wind turbines? ♻️ <br>
+    • And how official news coverage on renewable energy compares with the general public's attitude? 📰<br>
+    • This project lets you dive into the world of renewable energy sentiment - no technical knowledge required! 🤗<br>
+    """, unsafe_allow_html=True)
 
     # Why was this tool created?
     st.markdown("<h2>🎯 Why was this tool created?</h2>", unsafe_allow_html=True)
-    st.markdown("""
-    • Ever wondered what people really think about solar panels and wind turbines?<br>
-    • And how official news coverage compares to the attitude of the general public?<br>
-    • This tool lets you dive into the world of renewable energy sentiment - no technical knowledge required!
+        
+    st.markdown(f"""
+    [We](Meet_the_Team) created {get_emoji_title()} to empower you to investigate and draw your own conclusions about the ongoing transition towards a more sustainable energy system. 🔎 
+    
+    We want to bridge the gap between public perception and media coverage of renewable energy, making complex sentiment analysis accessible to everyone - no technical knowledge required! 🤗
+    
+    Since this covers a lot of ground 🙊 let's dive into <a href="#what-can-you-do-with-this-tool">what you can do</a>, <a href="#how-does-it-work">how this works</a> and <a href="#your-workflow">your workflow</a> to prevent further <a href="https://en.wiktionary.org/wiki/brainfuck" target="_blank">brainfuck</a>! 🤯
     """, unsafe_allow_html=True)
     
-    
-    st.markdown("""
-    [We](Meet_the_Team) created this tool to help you to 🕹️ interactively 🔎 investigate how ♻️ renewable energy is perceived by the general public (Twitter) and how that perception is reflected in official news coverage 📝
-    """)
-    
-    st.markdown("""
-    Well that was quite a mouthful 🙊, so let's break it down to prevent further <a href="https://www.tandfonline.com/doi/full/10.1080/07350198.2020.1727096" target="_blank">brainfuck</a> 🤯:
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    Our goal is to empower you, the user, to investigate and draw your own conclusions about our ongoing transition to renewable energy.
-    """)
-    
-    st.markdown("For this we:")
-    st.markdown("""
-    1. Gather raw data from twitter and news sites, as well as additional metrics like economic performance (S&P 500) and installed renewable capacity (Ember's Monthly Wind and Solar)
-    2. Make this data publicly accessible for free
-    3. Create tools for you to visualize sentiment trends and correlations with additional data, generate AI-driven summaries, and finally export your insights as audio SoundBytes, i.e. create your own podcast on this hot topic 🔥
-    """)
-
     # What can you do with this tool?
     st.markdown("<h2>🔍 What can you do with this tool?</h2>", unsafe_allow_html=True)
     st.markdown("""
-    You can explore how public sentiment around renewable energy and energy storage evolves from 2022 to 2024. 
-    Compare these trends with key renewable energy indicators including S&P 500 market performance and 
-    Ember's Monthly Wind and Solar Capacity Data, all during the same timeframe from 2022-01-02 to 2024-12-24.
-
-    You can also generate AI-driven summaries of the data and export your insights as audio SoundBytes, i.e. create your own podcast on this hot topic 🔥
-    """)
+    **Explore sentiment trends**: <br>
+    Discover how public opinion around renewable energy and energy storage evolved by comparing: <br>
+    • General public discussions ([Twitter / X](https://en.wikipedia.org/wiki/Twitter)) <br>
+    • Official news coverage ([GNews](https://gnews.io/)) <br>
+    
+    **Add context with market data**: <br>
+    Enhance your analysis by overlaying: <br>
+    • [S&P 500 market performance](https://www.investing.com/indices/us-spx-500-historical-data) <br>
+    • [Global Wind and Solar Capacity Data](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/) <br>
+    
+    **Generate insights**: <br>
+    Use our [interactive dashboard](Interactive_Dashboard) to: <br>
+    • customize your data range <br>
+    • create AI-driven summaries <br>
+    • and export your findings as audio SoundBytes <br>
+    • to create your own podcast on this hot topic! 🔥
+    """, unsafe_allow_html=True)
 
     # How does it work?
     st.markdown("<h2>⚙️ How does it work?</h2>", unsafe_allow_html=True)
     st.markdown("""
-    Using Natural Language Processing (NLP), we analyzed Twitter conversations and official news articles for you to visualize trends in public opinion and media coverage around renewable energy.  
-    We also compared these trends with key renewable energy indicators including S&P 500 market performance and 
-    Ember's Monthly Wind and Solar Capacity Data, all during the same timeframe from 2022-01-02 to 2024-12-24.
+
+    1. **Data Collection**: We gathered raw data from Twitter, news sites, plus additional metrics like S&P 500 performance and Ember's Monthly Wind and Solar capacity data
+    
+    2. **Natural Language Processing (NLP)**: Using advanced NLP techniques, we analyzed sentiment patterns in social media conversations and official news articles to identify trends in public opinion and media coverage
+    
+    3. **Accessible Tools**: We made this data freely available through user-friendly visualization tools that let you explore correlations, generate AI summaries, and create audio exports
+    
+    Want to dive deeper into the technical details? Check out our [From Raw Data to Podcasts](From_Raw_Data_to_Podcasts) page for a comprehensive look at our data processing pipeline!
+
+    All analysis covers the same timeframe (2022-01-02 to 2024-12-24) to ensure meaningful comparisons across different data sources.
     """)
+
+    # Your workflow
+    st.markdown("<h2>🚀 Your <a href='Interactive_Dashboard'>dashboard</a> workflow</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    • **Choose your timeframe** - Select the date range you want to analyze <br>
+    • **Select your data** - Pick from tweets, news, market and renewable capacity metrics <br>
+    • **Explore visual sentiment analysis** - Customize and animate your interactive chart <br>
+    • **Generate an AI summary** - Create text and audio summaries of your findings <br>
+    """, unsafe_allow_html=True)
+
+
 
         
     # Render the reusable footer
