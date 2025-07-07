@@ -18,14 +18,18 @@ from shared_components import get_emoji_title, render_emoji_title_header, get_em
 
 def dashboard_info():
     """Display the main header and hero section"""
-    st.title("📊 Interactive Dashboard for You To")
-    st.title("🔎 Discover the Stories Behind the Data")
-    # st.markdown("""
-    #     **🔎 Discover the stories behind the data.** """)
+    st.title("🔍 Investigate Sentiment Towards Renewables")
     st.markdown("""
-    Navigate through our sentiment analysis dashboard to explore how public opinion from ***tweets and official news***
-    correlates with [S&P 500 as economic indicator](https://www.investing.com/indices/us-spx-500-historical-data) and the [installed solar and wind capacity](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/). Scroll down to generate your custom report (text and audio) based on the data you chose to plot.""")
-    st.markdown("---")
+    **📊 Interactive Dashboard for you to Discover the Stories Behind the Data**
+    
+    To explore how public opinion about renewable energy from ***tweets and official news articles*** 
+    correlates with market indicators ([S&P 500](https://www.investing.com/indices/us-spx-500-historical-data)) 
+    and installed renewable energy capacity ([installed solar and wind capacity](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/)) you can: 
+    - select a custom time period or a global event at a specific date
+    - choose which additional metrics to overlay
+    - generate AI-summary from customized data selection and convert into audio file
+    """)
+    
 
 def interactive_dashboard():
     """Content for Dashboard page"""
@@ -171,8 +175,22 @@ def interactive_dashboard():
 def main():   
     st.set_page_config(page_title="Interactive Dashboard @ ☀️🔊🍔", page_icon="📊", layout="wide") 
     dashboard_info()
-    interactive_dashboard()
-
+    
+    # Add CSS for sticky timeframe selector
+    st.markdown("""
+    <style>
+    .sticky-timeframe {
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        background-color: white;
+        padding: 15px 0;
+        margin-bottom: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Load data first
     df_news = create_df_of_newsarticle_result()
     df_news['date'] = pd.to_datetime(df_news['date'])
     df_news['month'] = df_news['date'].dt.to_period('M').dt.to_timestamp()
@@ -199,13 +217,11 @@ def main():
     monthly_stats_twitter['source'] = 'tweet'
 
     df = pd.concat([monthly_stats_twitter, monthly_stats_news])
-
-    def sentiment_color(val):
-        # Map sentiment from 0-1 range: 0=red, 1=green
-        r = int(255 * (1 - val))  # Red decreases as sentiment increases
-        g = int(255 * val)        # Green increases as sentiment increases
-        return f'rgb({r},{g},100)'
-
+    
+    # Generate months list for timeframe selector
+    months = df['month'].dt.strftime('%Y-%m').unique()
+    
+    # Define GLOBAL_EVENTS for use throughout the function
     GLOBAL_EVENTS = {
         "Russian invasion of Ukraine": "2022-02-24",
         "EU announces REPowerEU plan": "2022-05-18",
@@ -215,6 +231,70 @@ def main():
         "COP28 concludes with historic agreement to transition away from fossil fuels": "2023-12-13"
     }
     EVENT_DATES = {event: pd.to_datetime(date) for event, date in GLOBAL_EVENTS.items()}
+    
+    # ===== STICKY TIMEFRAME SELECTOR =====
+    with st.container():
+        st.markdown('<div class="sticky-timeframe">', unsafe_allow_html=True)
+        st.subheader("📅 Select Analysis Timeframe")
+        
+        # Create two columns for the selection options
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.write("**Option 1: Custom Time Period**")
+            start_idx, end_idx = st.select_slider(
+                "Select timeframe:",
+                options=list(range(len(months))),
+                value=(0, len(months)-1),
+                format_func=lambda x: months[x],
+                help="Select the start and end months for your analysis"
+            )
+            
+            # Add metrics selector below timeframe for Option 1
+            st.write("**📊 Additional Metrics (Monthly Data)**")
+            selected_metrics = st.multiselect(
+                "Select metrics to overlay:",
+                options=['S&P 500', 'Installed Capacity Renewables'],
+                default=[],
+                help="These monthly metrics will be overlaid with sentiment data for trend analysis"
+            )
+        
+        with col2:
+            st.write("**Option 2: Global Event**")
+            selected_event = st.selectbox(
+                "Select Global Event:",
+                options=["None"] + [f"{date} {event}" for event, date in GLOBAL_EVENTS.items()],
+                help="Choose a global event to analyze sentiment around that specific date (overwrites timeframe selection)"
+            )
+            
+            # Move chart legend to the right underneath Option 2
+            st.write("**📊 Chart Legend:**")
+            st.markdown("""
+            - **Circles**: Articles  
+            - **Rhombi**: Tweets  
+            - **Y-axis**: Sentiment consensus (higher = more agreement, lower = more disagreement)  
+            - **Color**: Red (negative) to Green (positive)  
+            - **Size**: Number of texts (articles/tweets)  
+            """, help="Visual guide for interpreting the chart elements")
+            
+        # Add combined metrics information below both columns after selected_event is defined
+        if selected_event and selected_event != "None":
+            with col1:
+                st.info("🔒 For event analysis, only sentiment data is displayed. Monthly metrics are hidden when zooming into specific events.")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Continue with the old interactive_dashboard logic
+    interactive_dashboard()
+
+    def sentiment_color(val):
+        # Map sentiment from 0-1 range: 0=red, 1=green
+        r = int(255 * (1 - val))  # Red decreases as sentiment increases
+        g = int(255 * val)        # Green increases as sentiment increases
+        return f'rgb({r},{g},100)'
+
+    # Global events data (now defined in the main timeframe selector above)
+    # EVENT_DATES will be created from the GLOBAL_EVENTS defined in the selector
     SHORT_EVENT_LABELS = {
         "Russian invasion of Ukraine": "Russia Invasion",
         "EU announces REPowerEU plan": "REPowerEU Plan",
@@ -236,30 +316,9 @@ def main():
             **metrics
         })
 
-    st.markdown("""
-    - **Circles**: Articles  
-    - **Rhombi**: Tweets  
-    - **Y-axis**: Sentiment consensus (higher = more agreement, lower = more disagreement)  
-    - **Color**: Red (negative) to Green (positive)  
-    - **Size**: Number of texts (articles/tweets)  
-    """)
+    # Sidebar controls (metrics selector moved to main timeframe area)
 
-    months = df['month'].dt.strftime('%Y-%m').unique()
-    
-    selected_event = st.sidebar.selectbox(
-        "Select Global Event:",
-        options=["None"] + [f"{date.strftime('%Y-%m-%d')} {event}" for event, date in EVENT_DATES.items()]
-    )
-
-    selected_metrics = st.sidebar.multiselect(
-        "Select Metrics to Overlay:",
-        options=['S&P 500', 'Installed Capacity Renewables'],
-        default=[]
-    )
-
-    show_animation = st.sidebar.checkbox("Animate Monthly Data", value=False)
-
-
+    # Data filtering based on timeframe selector and event selection
     if selected_event and selected_event != "None":
         event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
         event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
@@ -301,25 +360,15 @@ def main():
         df_window = pd.concat([hourly_stats_twitter, daily_stats_news])
         
         months_dt = pd.to_datetime(months, format='%Y-%m')
-        start_idx = np.searchsorted(months_dt, start_date, side='left')
-        end_idx = np.searchsorted(months_dt, end_date, side='right') - 1
-        start_idx = max(0, start_idx)
-        end_idx = min(len(months) - 1, end_idx)
+        start_idx_event = np.searchsorted(months_dt, start_date, side='left')
+        end_idx_event = np.searchsorted(months_dt, end_date, side='right') - 1
+        start_idx_event = max(0, start_idx_event)
+        end_idx_event = min(len(months) - 1, end_idx_event)
     else:
-        start_idx, end_idx = st.select_slider(
-            "Select Monthly Time Window:",
-            options=list(range(len(months))),
-            value=(0, len(months)-1),
-            format_func=lambda x: months[x]
-        )
+        # Use the timeframe from the sticky selector above
         df_window = df[(df['month'] >= pd.to_datetime(months[start_idx])) & (df['month'] <= pd.to_datetime(months[end_idx]))]
 
-    months_with_data = []
-    if not df_window.empty:
-        months_with_data = sorted(set(
-            df_window[df_window['source'] == 'article']['month'].unique().tolist() +
-            df_window[df_window['source'] == 'tweet']['month'].unique().tolist()
-        ))
+
 
 
     monthly_sp500 = preprocess_sp500_df()
@@ -348,81 +397,39 @@ def main():
             hoverinfo='text',
         ))
     colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown']
-    if show_animation:
-        for metric_idx, (metric, color) in enumerate(zip(selected_metrics, colors)):
-            trace_yaxis_value = f'y{metric_idx + 2}'
-            fig.add_trace(go.Scatter(
-                x=[],
-                y=[],
-                mode='lines',
-                name=metric,
-                line=dict(color=color),
-                yaxis=trace_yaxis_value,
-                showlegend=True,
-                legendgroup=metric
-            ))
-    if not show_animation:
-        for source_idx, (source, shape) in enumerate(zip(['article', 'tweet'], ['circle', 'diamond'])):
-            d_all_data = df_window[df_window['source'] == source]
-            fig.data[source_idx].x = d_all_data['month'].tolist() if not d_all_data.empty else []
-            fig.data[source_idx].y = d_all_data['std_sentiment'].tolist() if not d_all_data.empty else []
-            if shape == 'diamond':  # Twitter symbols
-                fig.data[source_idx].marker.size = [12 + (cnt/d_all_data['count'].max())*12 for cnt in d_all_data['count']] if not d_all_data.empty else []
-            else:  # News symbols
-                fig.data[source_idx].marker.size = np.sqrt(d_all_data['count'])*3 if not d_all_data.empty else []
-            fig.data[source_idx].marker.color = [sentiment_color(v) for v in d_all_data['mean_sentiment']] if not d_all_data.empty else []
-            fig.data[source_idx].text = [
-                f"{source.capitalize()}<br>Month: {m.strftime('%Y-%m')}<br>Mean Sentiment: {s:.2f}<br>Consensus: {c:.2f}<br>Count: {cnt}" 
-                for m, s, c, cnt in zip(d_all_data['month'], d_all_data['mean_sentiment'], d_all_data['std_sentiment'], d_all_data['count'])
-            ] if not d_all_data.empty else []
-    elif months_with_data:
-        first_month = months_with_data[0]
-        for source_idx, (source, shape) in enumerate(zip(['article', 'tweet'], ['circle', 'diamond'])):
-            d_first_month = df_window[(df_window['source'] == source) & (df_window['month'] <= first_month)]
-            fig.data[source_idx].x = d_first_month['month'].tolist() if not d_first_month.empty else []
-            fig.data[source_idx].y = d_first_month['std_sentiment'].tolist() if not d_first_month.empty else []
-            if shape == 'diamond':  # Twitter symbols
-                fig.data[source_idx].marker.size = [12 + (cnt/d_first_month['count'].max())*12 for cnt in d_first_month['count']] if not d_first_month.empty else []
-            else:  # News symbols
-                fig.data[source_idx].marker.size = np.sqrt(d_first_month['count'])*3 if not d_first_month.empty else []
-            marker_colors = []
-            marker_opacities = []
-            if not d_first_month.empty:
-                for i, row in d_first_month.iterrows():
-                    marker_colors.append(sentiment_color(row['mean_sentiment']))
-                    if row['month'] < first_month:
-                        marker_opacities.append(0.3)
-                    else:
-                        marker_opacities.append(1.0)
-            fig.data[source_idx].marker.color = marker_colors
-            fig.data[source_idx].marker.opacity = marker_opacities
-            fig.data[source_idx].text = [
-                f"{source.capitalize()}<br>Month: {m.strftime('%Y-%m')}<br>Mean Sentiment: {s:.2f}<br>Consensus: {c:.2f}<br>Count: {cnt}" 
-                for m, s, c, cnt in zip(d_first_month['month'], d_first_month['mean_sentiment'], d_first_month['std_sentiment'], d_first_month['count'])
-            ] if not d_first_month.empty else []
-        for metric_idx, (metric, color) in enumerate(zip(selected_metrics, colors)):
-            metric_trace_idx = 2 + metric_idx
-            if metric_trace_idx < len(fig.data):
-                d_metric_first_month = metric_df[metric_df['month'] <= first_month]
-                fig.data[metric_trace_idx].x = d_metric_first_month['month'].tolist() if not d_metric_first_month.empty else []
-                fig.data[metric_trace_idx].y = d_metric_first_month[metric].tolist() if not d_metric_first_month.empty else []
+    
+    # Add sentiment data to the plot
+    for source_idx, (source, shape) in enumerate(zip(['article', 'tweet'], ['circle', 'diamond'])):
+        d_all_data = df_window[df_window['source'] == source]
+        fig.data[source_idx].x = d_all_data['month'].tolist() if not d_all_data.empty else []
+        fig.data[source_idx].y = d_all_data['std_sentiment'].tolist() if not d_all_data.empty else []
+        if shape == 'diamond':  # Twitter symbols
+            fig.data[source_idx].marker.size = [12 + (cnt/d_all_data['count'].max())*12 for cnt in d_all_data['count']] if not d_all_data.empty else []
+        else:  # News symbols
+            fig.data[source_idx].marker.size = np.sqrt(d_all_data['count'])*3 if not d_all_data.empty else []
+        fig.data[source_idx].marker.color = [sentiment_color(v) for v in d_all_data['mean_sentiment']] if not d_all_data.empty else []
+        fig.data[source_idx].text = [
+            f"{source.capitalize()}<br>Month: {m.strftime('%Y-%m')}<br>Mean Sentiment: {s:.2f}<br>Consensus: {c:.2f}<br>Count: {cnt}" 
+            for m, s, c, cnt in zip(d_all_data['month'], d_all_data['mean_sentiment'], d_all_data['std_sentiment'], d_all_data['count'])
+        ] if not d_all_data.empty else []
 
+    # Only add metrics for custom time periods, not for events
     metric_yaxis_layout_config = {}
-    current_plot_yaxis_id = 2
-    for metric, color in zip(selected_metrics, colors):
-        layout_axis_key = f'yaxis{current_plot_yaxis_id}'
-        trace_yaxis_value = f'y{current_plot_yaxis_id}'
-        metric_yaxis_layout_config[layout_axis_key] = dict(
-            title=metric,
-            overlaying='y',
-            side='right',
-            showgrid=False,
-            automargin=True,
-            anchor='free',
-            position=1 - (0.07 * (current_plot_yaxis_id - 1))
-        )
-        if not show_animation:
-            # Filter metric data to match the time window
+    if not (selected_event and selected_event != "None"):
+        current_plot_yaxis_id = 2
+        for metric, color in zip(selected_metrics, colors):
+            layout_axis_key = f'yaxis{current_plot_yaxis_id}'
+            trace_yaxis_value = f'y{current_plot_yaxis_id}'
+            metric_yaxis_layout_config[layout_axis_key] = dict(
+                title=metric,
+                overlaying='y',
+                side='right',
+                showgrid=False,
+                automargin=True,
+                anchor='free',
+                position=1 - (0.07 * (current_plot_yaxis_id - 1))
+            )
+            # Filter metric data for custom time periods only
             filtered_metric_df = metric_df[(metric_df['month'] >= pd.to_datetime(months[start_idx])) & (metric_df['month'] <= pd.to_datetime(months[end_idx]))]
             fig.add_trace(go.Scatter(
                 x=filtered_metric_df['month'],
@@ -434,7 +441,7 @@ def main():
                 showlegend=True,
                 legendgroup=metric
             ))
-        current_plot_yaxis_id += 1
+            current_plot_yaxis_id += 1
 
     if selected_event and selected_event != "None" and not df_window.empty:
         event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
@@ -456,84 +463,61 @@ def main():
     elif selected_event and selected_event != "None" and df_window.empty:
         st.warning("No data available for the selected event window.")
 
-    if show_animation:
-        frames = []
-        for m_idx, m in enumerate(months_with_data):
-            frame_updates_for_traces = []
-            for source_idx, (source, shape) in enumerate(zip(['article', 'tweet'], ['circle', 'diamond'])):
-                d_for_frame = df_window[(df_window['source'] == source) & (df_window['month'] <= m)]
-                marker_colors = []
-                marker_opacities = []
-                if not d_for_frame.empty:
-                    for i, row in d_for_frame.iterrows():
-                        marker_colors.append(sentiment_color(row['mean_sentiment']))
-                        if row['month'] < m:
-                            marker_opacities.append(0.3)
-                        else:
-                            marker_opacities.append(1.0)
-                frame_updates_for_traces.append({
-                    'x': d_for_frame['month'].tolist() if not d_for_frame.empty else [],
-                    'y': d_for_frame['std_sentiment'].tolist() if not d_for_frame.empty else [],
-                    'marker': {
-                        'size': [12 + (cnt/d_for_frame['count'].max())*12 for cnt in d_for_frame['count']] if shape == 'diamond' and not d_for_frame.empty else (np.sqrt(d_for_frame['count'])*3 if not d_for_frame.empty else []),
-                        'color': marker_colors,
-                        'symbol': shape,
-                        'line': dict(width=1, color='black'),
-                        'opacity': marker_opacities
-                    },
-                    'text': [
-                        f"{source.capitalize()}<br>Month: {mo.strftime('%Y-%m')}<br>Mean Sentiment: {s:.2f}<br>Consensus: {c:.2f}<br>Count: {cnt}" 
-                        for mo, s, c, cnt in zip(d_for_frame['month'], d_for_frame['mean_sentiment'], d_for_frame['std_sentiment'], d_for_frame['count'])
-                    ] if not d_for_frame.empty else [],
-                })
-            for metric_idx, (metric, color) in enumerate(zip(selected_metrics, colors)):
-                metric_trace_idx = 2 + metric_idx
-                d_metric_for_frame = metric_df[metric_df['month'] <= m]
-                frame_updates_for_traces.append({
-                    'x': d_metric_for_frame['month'].tolist() if not d_metric_for_frame.empty else [],
-                    'y': d_metric_for_frame[metric].tolist() if not d_metric_for_frame.empty else [],
-                })
-            frames.append(go.Frame(data=frame_updates_for_traces, name=str(m)))
-        if frames:
-            fig.frames = frames
-            fig.update_layout(
-                updatemenus=[{
-                    "type": "buttons",
-                    "buttons": [
-                        {
-                            "label": "Play",
-                            "method": "animate",
-                            "args": [
-                                None, 
-                                {
-                                    "frame": {"duration": 500, "redraw": True}, 
-                                    "fromcurrent": True, 
-                                    "mode": "immediate"
-                                }
-                            ],
-                            "args2": [
-                                [None], 
-                                {
-                                    "frame": {"duration": 0, "redraw": False}, 
-                                    "mode": "immediate"
-                                }
-                            ],
-                        }
-                    ]
-                }]
-            )
+
+
+    # Calculate regular tick intervals based on whether event is selected
+    if not df_window.empty:
+        if selected_event and selected_event != "None":
+            # For events, show daily/hourly ticks for precise sentiment analysis
+            event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
+            event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
+            start_display = event_date - pd.Timedelta(days=1)
+            end_display = event_date + pd.Timedelta(days=1)
+            
+            # Generate daily ticks for the 3-day event window
+            display_tickvals = []
+            current_day = start_display
+            while current_day <= end_display:
+                display_tickvals.append(current_day)
+                current_day += pd.Timedelta(days=1)
         else:
-            st.warning("No data available for animation in the selected window.")
-
-    visible_months = df_window['month'].unique()
-    if len(visible_months) > 12:
-        indices_to_show = np.linspace(0, len(visible_months) - 1, 12, dtype=int)
-        display_tickvals = [visible_months[i] for i in indices_to_show]
+            # For custom periods, show monthly ticks
+            start_month = pd.to_datetime(months[start_idx])
+            end_month = pd.to_datetime(months[end_idx])
+            
+            # Calculate total months in range
+            total_months = (end_month.year - start_month.year) * 12 + (end_month.month - start_month.month) + 1
+            
+            # Dynamically determine interval to keep around 8-10 ticks
+            target_ticks = 9  # Optimal number of ticks
+            interval_months = max(1, round(total_months / target_ticks))
+            
+            # Generate ticks at regular intervals starting from first month
+            display_tickvals = []
+            current_month = start_month
+            while current_month <= end_month:
+                display_tickvals.append(current_month)
+                # Add the interval months
+                if current_month.month + interval_months > 12:
+                    next_year = current_month.year + ((current_month.month + interval_months - 1) // 12)
+                    next_month = ((current_month.month + interval_months - 1) % 12) + 1
+                else:
+                    next_year = current_month.year
+                    next_month = current_month.month + interval_months
+                current_month = pd.Timestamp(year=next_year, month=next_month, day=1)
     else:
-        display_tickvals = visible_months
+        display_tickvals = []
 
+    # Set x-axis format based on whether event is selected
+    if selected_event and selected_event != "None":
+        x_axis_title = 'Date'
+        x_tick_format = '%Y-%m-%d'
+    else:
+        x_axis_title = 'Month'
+        x_tick_format = '%Y-%m'
+    
     fig.update_layout(
-        xaxis=dict(title='Month', tickformat='%Y-%m', tickvals=display_tickvals),
+        xaxis=dict(title=x_axis_title, tickformat=x_tick_format, tickvals=display_tickvals, showgrid=True, gridcolor='lightgray'),
         yaxis=dict(
             title='Sentiment Consensus (Std Dev)',
             autorange='reversed',
@@ -574,10 +558,18 @@ def main():
     
     # --- TEXT GENERATION AND AUDIO ---
     
-    # Get the actual date range from the slider
-    start_month_str = months[start_idx] if start_idx < len(months) else "N/A"
-    end_month_str = months[end_idx] if end_idx < len(months) else "N/A"
-    st.write(f"**Analysis Period:** {start_month_str} to {end_month_str}")
+    # Get the actual date range being plotted (either slider or event window)
+    if selected_event and selected_event != "None":
+        event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
+        event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
+        start_display_period = event_date - pd.Timedelta(days=1)
+        end_display_period = event_date + pd.Timedelta(days=1)
+        period_str = f"{start_display_period.strftime('%Y-%m-%d')} to {end_display_period.strftime('%Y-%m-%d')} (3 days around {event_name_only})"
+    else:
+        start_month_str = months[start_idx] if start_idx < len(months) else "N/A"
+        end_month_str = months[end_idx] if end_idx < len(months) else "N/A"
+        month_count = end_idx - start_idx + 1
+        period_str = f"{start_month_str} to {end_month_str} ({month_count} months)"
     
     # Initialize session state for generated text
     if 'generated_text' not in st.session_state:
@@ -585,18 +577,27 @@ def main():
     
     # Show what will be included in the report
     st.subheader("📋 AI Report Configuration")
-    st.write("**Time Period:** {} to {}".format(months[start_idx], months[end_idx]))
+    st.write(f"**Analysis Period:** {period_str}")
     
-    if selected_metrics:
+    if selected_event and selected_event != "None":
+        st.write("**📊 Metrics:** Focused on sentiment data only (metrics not displayed for event analysis)")
+    elif selected_metrics:
         st.write("**📊 Metrics to include:**")
         for metric in selected_metrics:
             st.write(f"  • {metric}")
     else:
         st.write("**📊 Metrics:** Only sentiment data (no economic/capacity metrics selected)")
     
-    # Show relevant events
-    start_date_preview = pd.to_datetime(months[start_idx])
-    end_date_preview = pd.to_datetime(months[end_idx])
+    # Show relevant events for the actual analysis period
+    if selected_event and selected_event != "None":
+        event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
+        event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
+        start_date_preview = event_date - pd.Timedelta(days=1)
+        end_date_preview = event_date + pd.Timedelta(days=1)
+    else:
+        start_date_preview = pd.to_datetime(months[start_idx])
+        end_date_preview = pd.to_datetime(months[end_idx])
+    
     preview_events = []
     
     for event_name, event_date_str in GLOBAL_EVENTS.items():
@@ -631,36 +632,81 @@ def main():
     # Button to generate text report
     elif st.button("⚙️ Generate AI Report"):
         try:
-            # Filter data for the selected period for text generation
-            filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
-            filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
+            # Filter data for the actual analysis period (either slider range or event window)
+            if selected_event and selected_event != "None":
+                event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
+                event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
+                text_start_date = event_date - pd.Timedelta(days=1)
+                text_end_date = event_date + pd.Timedelta(days=1)
+                
+                # For events, filter by actual date instead of month
+                filtered_news_for_text = df_news[(df_news['date'] >= text_start_date) & (df_news['date'] <= text_end_date)]
+                filtered_twitter_for_text = df_twitter[(df_twitter['date'] >= text_start_date) & (df_twitter['date'] <= text_end_date)]
+            else:
+                # For custom periods, use monthly filtering as before
+                filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
+                filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
             
             # Aggregate the filtered data for text generation
-            monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
-                mean_sentiment=('pos_score', 'mean'),
-                count=('correct_prob', 'count'),
-                std_sentiment=('correct_prob', 'std'),
-            ).reset_index()
-            
-            monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
-                mean_sentiment=('pos_score', 'mean'),
-                count=('correct_prob', 'count'),
-                std_sentiment=('correct_prob', 'std'),
-            ).reset_index()
+            if selected_event and selected_event != "None":
+                # For events, aggregate by day for news and hour for twitter
+                filtered_news_for_text['day'] = filtered_news_for_text['date'].dt.date
+                monthly_stats_news_text = filtered_news_for_text.groupby('day').agg(
+                    mean_sentiment=('pos_score', 'mean'),
+                    count=('correct_prob', 'count'),
+                    std_sentiment=('correct_prob', 'std'),
+                ).reset_index()
+                monthly_stats_news_text['month'] = pd.to_datetime(monthly_stats_news_text['day'])
+                
+                filtered_twitter_for_text['hour'] = filtered_twitter_for_text['date'].dt.floor('H')
+                monthly_stats_twitter_text = filtered_twitter_for_text.groupby('hour').agg(
+                    mean_sentiment=('pos_score', 'mean'),
+                    count=('correct_prob', 'count'),
+                    std_sentiment=('correct_prob', 'std'),
+                ).reset_index()
+                monthly_stats_twitter_text['month'] = monthly_stats_twitter_text['hour']
+            else:
+                # For custom periods, aggregate by month as before
+                monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
+                    mean_sentiment=('pos_score', 'mean'),
+                    count=('correct_prob', 'count'),
+                    std_sentiment=('correct_prob', 'std'),
+                ).reset_index()
+                
+                monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
+                    mean_sentiment=('pos_score', 'mean'),
+                    count=('correct_prob', 'count'),
+                    std_sentiment=('correct_prob', 'std'),
+                ).reset_index()
             
             # Only include metrics data if they are selected for display
             filtered_sp500_text = pd.DataFrame()  # Empty by default
             filtered_energy_text = pd.DataFrame()  # Empty by default
             
             if 'S&P 500' in selected_metrics:
-                filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
+                if selected_event and selected_event != "None":
+                    # For events, get the closest monthly data points around the event
+                    event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
+                    filtered_sp500_text = monthly_sp500[monthly_sp500['month'] == event_month]
+                else:
+                    filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
             
             if 'Installed Capacity Renewables' in selected_metrics:
-                filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
+                if selected_event and selected_event != "None":
+                    # For events, get the closest monthly data points around the event
+                    event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
+                    filtered_energy_text = df_energy[df_energy['month'] == event_month]
+                else:
+                    filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
             
-            # Filter events that fall within the selected timeframe
-            start_date_period = pd.to_datetime(months[start_idx])
-            end_date_period = pd.to_datetime(months[end_idx])
+            # Filter events that fall within the actual analysis timeframe
+            if selected_event and selected_event != "None":
+                start_date_period = text_start_date
+                end_date_period = text_end_date
+            else:
+                start_date_period = pd.to_datetime(months[start_idx])
+                end_date_period = pd.to_datetime(months[end_idx])
+            
             relevant_events = []
             
             for event_name, event_date_str in GLOBAL_EVENTS.items():
