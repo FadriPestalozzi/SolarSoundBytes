@@ -10,6 +10,37 @@ def main():
     """Main function for the welcome page"""
     st.set_page_config(page_title="SolarSoundBytes = ☀️🔊🍔", page_icon="🤗", layout="wide")
 
+    # Mobile device warning - only shows on small screens
+    st.markdown("""
+    <style>
+    .mobile-warning {
+        display: none;
+        background-color: #ff4b4b;
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+        text-align: center;
+        font-weight: bold;
+        border-left: 5px solid #ff6b47;
+    }
+    
+    @media only screen and (max-width: 768px) {
+        .mobile-warning {
+            display: block;
+        }
+    }
+    </style>
+    
+    <div class="mobile-warning">
+        📱➡️💻 <strong>Mobile Device Detected!</strong><br><br>
+        For the best user experience with ☀️Solar🔊Sound🍔Bytes, please use a desktop or laptop computer with mouse navigation. 
+        The interactive dashboard can be challenging to navigate on touch devices. 🖱️
+        <br><br>
+        Thank you for understanding! 🤗
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown(f"<h1 style='text-align: center'>What are {get_emoji_title()}?</h1>", unsafe_allow_html=True)
 
     st.markdown(f"""
