@@ -19,15 +19,12 @@ from shared_components import get_emoji_title, render_emoji_title_header, get_em
 def dashboard_info():
     """Display the main header and hero section"""
     st.title("🔍 Investigate Sentiment Towards Renewables")
-    st.markdown("""
-    **📊 Interactive Dashboard for you to Discover the Stories Behind the Data**
-    
-    To explore how public opinion about renewable energy from ***tweets and official news articles*** 
-    correlates with market indicators ([S&P 500](https://www.investing.com/indices/us-spx-500-historical-data)) 
-    and installed renewable energy capacity ([installed solar and wind capacity](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/)) you can: 
-    - select a custom time period or a global event at a specific date
-    - choose which additional metrics to overlay
-    - generate AI-summary from customized data selection and convert into audio file
+    st.markdown("""    
+    To explore how public opinion about renewable energy from tweets and official news articles correlates with market indicators ([S&P 500](https://www.investing.com/indices/us-spx-500-historical-data)) 
+    and installed renewable energy capacity ([installed solar and wind capacity](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/)) this interactive dashboard enables you to: 
+    - select a custom time period or a global event at a specific date ⏳
+    - choose which additional metrics to overlay 📈
+    - generate an AI-summary of your customized data selection and convert that summary into an audio file, i.e. your very own podcast 🔊
     """)
     
 
@@ -185,7 +182,10 @@ def main():
         z-index: 999;
         background-color: white;
         padding: 15px 0;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
+    }
+    .chart-legend-spacing {
+        margin-top: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -235,13 +235,13 @@ def main():
     # ===== STICKY TIMEFRAME SELECTOR =====
     with st.container():
         st.markdown('<div class="sticky-timeframe">', unsafe_allow_html=True)
-        st.subheader("📅 Select Analysis Timeframe")
+        st.subheader("⚙️ Choose Data to Analyze")
         
         # Create two columns for the selection options
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.write("**Option 1: Custom Time Period**")
+            st.write("**⏳ Option 1: Custom Time Period**")
             start_idx, end_idx = st.select_slider(
                 "Select timeframe:",
                 options=list(range(len(months))),
@@ -251,7 +251,7 @@ def main():
             )
             
             # Add metrics selector below timeframe for Option 1
-            st.write("**📊 Additional Metrics (Monthly Data)**")
+            st.write("**📈 Additional Metrics (Monthly Data)**")
             selected_metrics = st.multiselect(
                 "Select metrics to overlay:",
                 options=['S&P 500', 'Installed Capacity Renewables'],
@@ -260,29 +260,41 @@ def main():
             )
         
         with col2:
-            st.write("**Option 2: Global Event**")
+            st.write("**🌍 Option 2: Global Event**")
             selected_event = st.selectbox(
                 "Select Global Event:",
                 options=["None"] + [f"{date} {event}" for event, date in GLOBAL_EVENTS.items()],
                 help="Choose a global event to analyze sentiment around that specific date (overwrites timeframe selection)"
             )
-            
-            # Move chart legend to the right underneath Option 2
-            st.write("**📊 Chart Legend:**")
-            st.markdown("""
-            - **Circles**: Articles  
-            - **Rhombi**: Tweets  
-            - **Y-axis**: Sentiment consensus (higher = more agreement, lower = more disagreement)  
-            - **Color**: Red (negative) to Green (positive)  
-            - **Size**: Number of texts (articles/tweets)  
-            """, help="Visual guide for interpreting the chart elements")
-            
-        # Add combined metrics information below both columns after selected_event is defined
-        if selected_event and selected_event != "None":
-            with col1:
-                st.info("🔒 For event analysis, only sentiment data is displayed. Monthly metrics are hidden when zooming into specific events.")
         
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Chart legend spanning both columns
+        st.markdown('<div class="chart-legend-spacing">', unsafe_allow_html=True)
+        st.subheader("📊 Chart Legend")
+        
+        # Create three columns for the legend
+        legend_col1, legend_col2 = st.columns(2)
+        
+        with legend_col1:
+            st.markdown("""
+            - **Circles**: News Articles  
+            - **Rhombi**: Tweets
+            - **Color:** Red (negative) to Green (positive)  
+            - **Size:** Number of texts (articles/tweets)  
+            """)
+        
+        with legend_col2:
+            st.markdown("""
+            - **X-axis**: Time
+            - **Y-axis (primary, left)**: Sentiment consensus (higher = more agreement, lower = more disagreement)  
+            - **Y-axis (secondary, right)**: Optional metrics (e.g. S&P 500, installed capacity)
+            """)
+            
+        # Add combined metrics information below chart legend after selected_event is defined
+        if selected_event and selected_event != "None":
+            st.info("🔒 For event analysis, only sentiment data is displayed. Monthly metrics are hidden when zooming into specific events.")
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # Close chart-legend-spacing
+        st.markdown('</div>', unsafe_allow_html=True)  # Close sticky-timeframe
     
     # Continue with the old interactive_dashboard logic
     interactive_dashboard()
