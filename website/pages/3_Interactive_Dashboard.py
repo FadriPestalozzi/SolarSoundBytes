@@ -187,6 +187,51 @@ def main():
     .chart-legend-spacing {
         margin-top: 10px;
     }
+    /* General button styles - exclude primary buttons */
+    .stButton > button:not([kind="primary"]) {
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        color: black !important;
+        font-size: 4em !important;
+        font-weight: bold !important;
+        padding: 24px 48px !important;
+        box-shadow: none !important;
+    }
+    .stButton > button:not([kind="primary"]):hover {
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;1
+        box-shadow: none !important;
+    }
+    /* Specific styling for the SoundByte Summary button - multiple selectors for maximum compatibility */
+    div[data-testid="stButton"] button[kind="primary"],
+    div[data-testid="stButton"] button[kind="primary"] p,
+    div[data-testid="stButton"] button[kind="primary"] span,
+    .stButton button[kind="primary"],
+    .stButton button[kind="primary"] p,
+    .stButton button[kind="primary"] span {
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        background-color: #667eea !important;
+        color: white !important;
+        border: none !important;
+        font-size: 3.0rem !important;
+        font-weight: bold !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    /* Hover styles - keep gradient background but add red border */
+    div[data-testid="stButton"] button[kind="primary"]:hover,
+    .stButton button[kind="primary"]:hover{
+        border: 12px solid red !important;
+        color: white !important;
+    }
+    /* Fix button edges and match input sizing */
+    button[kind="primary"] {
+        font-size: 3.0rem !important;
+        outline: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
     
@@ -271,8 +316,8 @@ def main():
         st.markdown('<div class="chart-legend-spacing">', unsafe_allow_html=True)
         st.subheader("📊 Chart Legend")
         
-        # Create three columns for the legend
-        legend_col1, legend_col2 = st.columns(2)
+        # Create two columns for the legend with narrower first column
+        legend_col1, legend_col2 = st.columns([1, 2])
         
         with legend_col1:
             st.markdown("""
@@ -285,7 +330,7 @@ def main():
         with legend_col2:
             st.markdown("""
             - **X-axis**: Time
-            - **Y-axis (primary, left)**: Sentiment consensus (higher = more agreement, lower = more disagreement)  
+            - **Y-axis (primary, left)**: Sentiment consensus (higher = more agreement within aggregated data)  
             - **Y-axis (secondary, right)**: Optional metrics (e.g. S&P 500, installed capacity)
             """)
             
@@ -641,128 +686,149 @@ def main():
     if not api_key_from_secrets:
         st.warning("OpenAI API Key not found. To generate AI report, please set your OPENAI_API_KEY in .streamlit/secrets.toml or as an environment variable.")
 
-    # Button to generate text report
-    elif st.button("⚙️ Generate AI Report"):
+    # Button to generate text report and audio
+    elif st.button("🔊 Generate SoundByte Summary", 
+                    type="primary",
+                    help="Creates a concise AI summary of your selected timeframe and data, also available as audio."):
         try:
-            # Filter data for the actual analysis period (either slider range or event window)
-            if selected_event and selected_event != "None":
-                event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
-                event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
-                text_start_date = event_date - pd.Timedelta(days=1)
-                text_end_date = event_date + pd.Timedelta(days=1)
-                
-                # For events, filter by actual date instead of month
-                filtered_news_for_text = df_news[(df_news['date'] >= text_start_date) & (df_news['date'] <= text_end_date)]
-                filtered_twitter_for_text = df_twitter[(df_twitter['date'] >= text_start_date) & (df_twitter['date'] <= text_end_date)]
-            else:
-                # For custom periods, use monthly filtering as before
-                filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
-                filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
-            
-            # Aggregate the filtered data for text generation
-            if selected_event and selected_event != "None":
-                # For events, aggregate by day for news and hour for twitter
-                filtered_news_for_text['day'] = filtered_news_for_text['date'].dt.date
-                monthly_stats_news_text = filtered_news_for_text.groupby('day').agg(
-                    mean_sentiment=('pos_score', 'mean'),
-                    count=('correct_prob', 'count'),
-                    std_sentiment=('correct_prob', 'std'),
-                ).reset_index()
-                monthly_stats_news_text['month'] = pd.to_datetime(monthly_stats_news_text['day'])
-                
-                filtered_twitter_for_text['hour'] = filtered_twitter_for_text['date'].dt.floor('H')
-                monthly_stats_twitter_text = filtered_twitter_for_text.groupby('hour').agg(
-                    mean_sentiment=('pos_score', 'mean'),
-                    count=('correct_prob', 'count'),
-                    std_sentiment=('correct_prob', 'std'),
-                ).reset_index()
-                monthly_stats_twitter_text['month'] = monthly_stats_twitter_text['hour']
-            else:
-                # For custom periods, aggregate by month as before
-                monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
-                    mean_sentiment=('pos_score', 'mean'),
-                    count=('correct_prob', 'count'),
-                    std_sentiment=('correct_prob', 'std'),
-                ).reset_index()
-                
-                monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
-                    mean_sentiment=('pos_score', 'mean'),
-                    count=('correct_prob', 'count'),
-                    std_sentiment=('correct_prob', 'std'),
-                ).reset_index()
-            
-            # Only include metrics data if they are selected for display
-            filtered_sp500_text = pd.DataFrame()  # Empty by default
-            filtered_energy_text = pd.DataFrame()  # Empty by default
-            
-            if 'S&P 500' in selected_metrics:
+            with st.spinner("Generating your SoundByte summary and audio..."):
+                # Filter data for the actual analysis period (either slider range or event window)
                 if selected_event and selected_event != "None":
-                    # For events, get the closest monthly data points around the event
-                    event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
-                    filtered_sp500_text = monthly_sp500[monthly_sp500['month'] == event_month]
+                    event_name_only = selected_event.split(' ', 1)[1] if ' ' in selected_event else selected_event
+                    event_date = pd.to_datetime(GLOBAL_EVENTS[event_name_only])
+                    text_start_date = event_date - pd.Timedelta(days=1)
+                    text_end_date = event_date + pd.Timedelta(days=1)
+                    
+                    # For events, filter by actual date instead of month
+                    filtered_news_for_text = df_news[(df_news['date'] >= text_start_date) & (df_news['date'] <= text_end_date)]
+                    filtered_twitter_for_text = df_twitter[(df_twitter['date'] >= text_start_date) & (df_twitter['date'] <= text_end_date)]
                 else:
-                    filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
-            
-            if 'Installed Capacity Renewables' in selected_metrics:
+                    # For custom periods, use monthly filtering as before
+                    filtered_news_for_text = df_news[(df_news['month'] >= pd.to_datetime(months[start_idx])) & (df_news['month'] <= pd.to_datetime(months[end_idx]))]
+                    filtered_twitter_for_text = df_twitter[(df_twitter['month'] >= pd.to_datetime(months[start_idx])) & (df_twitter['month'] <= pd.to_datetime(months[end_idx]))]
+                
+                # Aggregate the filtered data for text generation
                 if selected_event and selected_event != "None":
-                    # For events, get the closest monthly data points around the event
-                    event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
-                    filtered_energy_text = df_energy[df_energy['month'] == event_month]
+                    # For events, aggregate by day for news and hour for twitter
+                    filtered_news_for_text['day'] = filtered_news_for_text['date'].dt.date
+                    monthly_stats_news_text = filtered_news_for_text.groupby('day').agg(
+                        mean_sentiment=('pos_score', 'mean'),
+                        count=('correct_prob', 'count'),
+                        std_sentiment=('correct_prob', 'std'),
+                    ).reset_index()
+                    monthly_stats_news_text['month'] = pd.to_datetime(monthly_stats_news_text['day'])
+                    
+                    filtered_twitter_for_text['hour'] = filtered_twitter_for_text['date'].dt.floor('H')
+                    monthly_stats_twitter_text = filtered_twitter_for_text.groupby('hour').agg(
+                        mean_sentiment=('pos_score', 'mean'),
+                        count=('correct_prob', 'count'),
+                        std_sentiment=('correct_prob', 'std'),
+                    ).reset_index()
+                    monthly_stats_twitter_text['month'] = monthly_stats_twitter_text['hour']
                 else:
-                    filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
-            
-            # Filter events that fall within the actual analysis timeframe
-            if selected_event and selected_event != "None":
-                start_date_period = text_start_date
-                end_date_period = text_end_date
-            else:
-                start_date_period = pd.to_datetime(months[start_idx])
-                end_date_period = pd.to_datetime(months[end_idx])
-            
-            relevant_events = []
-            
-            for event_name, event_date_str in GLOBAL_EVENTS.items():
-                event_date = pd.to_datetime(event_date_str)
-                if start_date_period <= event_date <= end_date_period:
-                    relevant_events.append(f"{event_date_str} {event_name}")
-            
-            result_text = create_text_from_sent_analy_df(
-                monthly_stats_twitter_text, 
-                monthly_stats_news_text, 
-                filtered_sp500_text, 
-                filtered_energy_text,
-                selected_metrics,
-                relevant_events
-            )
-            st.session_state.generated_text = result_text
-            
-            # Show summary of what was included
-            included_data = ["Twitter sentiment", "News sentiment"]
-            if 'S&P 500' in selected_metrics and not filtered_sp500_text.empty:
-                included_data.append("S&P 500 performance")
-            if 'Installed Capacity Renewables' in selected_metrics and not filtered_energy_text.empty:
-                included_data.append("Renewable capacity data")
-            
-            st.success(f"✅ AI Report generated successfully! Included: {', '.join(included_data)}")
-            if relevant_events:
-                st.info(f"📅 Analyzed {len(relevant_events)} event(s) in the selected timeframe")
+                    # For custom periods, aggregate by month as before
+                    monthly_stats_news_text = filtered_news_for_text.groupby('month').agg(
+                        mean_sentiment=('pos_score', 'mean'),
+                        count=('correct_prob', 'count'),
+                        std_sentiment=('correct_prob', 'std'),
+                    ).reset_index()
+                    
+                    monthly_stats_twitter_text = filtered_twitter_for_text.groupby('month').agg(
+                        mean_sentiment=('pos_score', 'mean'),
+                        count=('correct_prob', 'count'),
+                        std_sentiment=('correct_prob', 'std'),
+                    ).reset_index()
+                
+                # Only include metrics data if they are selected for display
+                filtered_sp500_text = pd.DataFrame()  # Empty by default
+                filtered_energy_text = pd.DataFrame()  # Empty by default
+                
+                if 'S&P 500' in selected_metrics:
+                    if selected_event and selected_event != "None":
+                        # For events, get the closest monthly data points around the event
+                        event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
+                        filtered_sp500_text = monthly_sp500[monthly_sp500['month'] == event_month]
+                    else:
+                        filtered_sp500_text = monthly_sp500[(monthly_sp500['month'] >= pd.to_datetime(months[start_idx])) & (monthly_sp500['month'] <= pd.to_datetime(months[end_idx]))]
+                
+                if 'Installed Capacity Renewables' in selected_metrics:
+                    if selected_event and selected_event != "None":
+                        # For events, get the closest monthly data points around the event
+                        event_month = pd.Timestamp(text_start_date.year, text_start_date.month, 1)
+                        filtered_energy_text = df_energy[df_energy['month'] == event_month]
+                    else:
+                        filtered_energy_text = df_energy[(df_energy['month'] >= pd.to_datetime(months[start_idx])) & (df_energy['month'] <= pd.to_datetime(months[end_idx]))]
+                
+                # Filter events that fall within the actual analysis timeframe
+                if selected_event and selected_event != "None":
+                    start_date_period = text_start_date
+                    end_date_period = text_end_date
+                else:
+                    start_date_period = pd.to_datetime(months[start_idx])
+                    end_date_period = pd.to_datetime(months[end_idx])
+                
+                relevant_events = []
+                
+                for event_name, event_date_str in GLOBAL_EVENTS.items():
+                    event_date = pd.to_datetime(event_date_str)
+                    if start_date_period <= event_date <= end_date_period:
+                        relevant_events.append(f"{event_date_str} {event_name}")
+                
+                result_text = create_text_from_sent_analy_df(
+                    monthly_stats_twitter_text, 
+                    monthly_stats_news_text, 
+                    filtered_sp500_text, 
+                    filtered_energy_text,
+                    selected_metrics,
+                    relevant_events
+                )
+                st.session_state.generated_text = result_text
+                
+                # Generate audio automatically
+                if isinstance(result_text, str) and result_text.strip():
+                    tts = gTTS(result_text.strip(), lang="en")
+                    tts.save("output.mp3")
+                    st.session_state.audio_generated = True
+                else:
+                    st.session_state.audio_generated = False
+                
+                # Show summary of what was included
+                included_data = ["Twitter sentiment", "News sentiment"]
+                if 'S&P 500' in selected_metrics and not filtered_sp500_text.empty:
+                    included_data.append("S&P 500 performance")
+                if 'Installed Capacity Renewables' in selected_metrics and not filtered_energy_text.empty:
+                    included_data.append("Renewable capacity data")
+                
+                st.success(f"✅ SoundByte Summary generated successfully! Included: {', '.join(included_data)}")
+                if relevant_events:
+                    st.info(f"📅 Analyzed {len(relevant_events)} event(s) in the selected timeframe")
         except Exception as e:
-            st.error(f"Error generating text: {str(e)}")
-            st.info("Text generation requires valid data for the selected time period.")
+            st.error(f"Error generating SoundByte: {str(e)}")
+            st.info("SoundByte generation requires valid data for the selected time period.")
     
     # Display generated text and audio controls if text exists
     if st.session_state.generated_text:
-        st.subheader("📝 AI-Generated Sentiment Analysis Report")
-        st.write("**Generated Report:**")
-        st.write(st.session_state.generated_text)
+        st.markdown("---")
+        st.markdown("### 📄 Your SoundByte Summary")
+        with st.container():
+            st.markdown(f"""
+            <div style="
+                background-color: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 4px solid #667eea;
+                margin: 10px 0;
+            ">
+                {st.session_state.generated_text}
+            </div>
+            """, unsafe_allow_html=True)
         
-        if st.button("🎧 Generate Audio"):
-            if isinstance(st.session_state.generated_text, str) and st.session_state.generated_text.strip():
-                tts = gTTS(st.session_state.generated_text.strip(), lang="en")
-                tts.save("output.mp3")
-                st.audio("output.mp3", format="audio/mp3")
-            else:
-                st.warning("Generated text is empty or invalid.")
+        # Audio section
+        if hasattr(st.session_state, 'audio_generated') and st.session_state.audio_generated:
+            st.markdown("### 🎧 Listen to your SoundByte")
+            st.audio("output.mp3", format="audio/mp3")
+        else:
+            st.info("Audio will be generated automatically with your next SoundByte summary.")
 
     render_footer()
 
