@@ -286,7 +286,7 @@ def main():
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.write("**⏳ Option 1: Custom Time Period**")
+            st.write("**⏳ Option 1: Choose Custom Time Period**")
             start_idx, end_idx = st.select_slider(
                 "Select timeframe:",
                 options=list(range(len(months))),
@@ -298,14 +298,14 @@ def main():
             # Add metrics selector below timeframe for Option 1
             st.write("**📈 Additional Metrics (Monthly Data)**")
             selected_metrics = st.multiselect(
-                "Select metrics to overlay:",
+                "Select metrics to overlay: (optional)",
                 options=['S&P 500', 'Installed Capacity Renewables'],
                 default=[],
                 help="These monthly metrics will be overlaid with sentiment data for trend analysis"
             )
         
         with col2:
-            st.write("**🌍 Option 2: Global Event**")
+            st.write("**🌍 Option 2: Choose Global Event**")
             selected_event = st.selectbox(
                 "Select Global Event:",
                 options=["None"] + [f"{date} {event}" for event, date in GLOBAL_EVENTS.items()],

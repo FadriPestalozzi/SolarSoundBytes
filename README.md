@@ -152,10 +152,10 @@ into global events where a significant change in sentiment is highly probable, a
 
 The resulting overview with reasoning based on verified refererences is
 available in a
-[pdf](<documentation/Global-Events-Influencing-Renewable-Energy-Sentiment-(2022–2024).pdf>)
+[pdf](<website/pages/attachments/global_events_summary.pdf>)
 and summarized in the [table below](#global-events-table). For detailed
 references and reasoning, see the
-[Global Events PDF](<documentation/Global-Events-Influencing-Renewable-Energy-Sentiment-(2022–2024).pdf>).
+[Global Events PDF](<website/pages/attachments/global_events_summary.pdf>).
 
 ## Global Events Table
 
