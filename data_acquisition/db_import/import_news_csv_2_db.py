@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""
+Import CSV news articles into SQLite DB via Git LFS
+"""
+
 import sqlite3
 import pandas as pd
 import json
@@ -5,6 +10,7 @@ import os
 import glob
 from datetime import datetime
 import re
+import ast
 
 
 def create_database_schema(db_path):
@@ -40,10 +46,8 @@ def parse_source_json(source_str):
         return source_data.get('name', ''), source_data.get('url', '')
     except json.JSONDecodeError:
         try:
-            # Handle Python dict-like string format (safer than eval)
-            # Replace single quotes with double quotes for JSON parsing
-            json_str = source_str.replace("'", '"')
-            source_data = json.loads(json_str)
+            # Handle Python dict-like string format safely using ast.literal_eval
+            source_data = ast.literal_eval(source_str)
             return source_data.get('name', ''), source_data.get('url', '')
         except Exception:
             # If all parsing fails, try to extract manually using regex
@@ -97,14 +101,6 @@ def import_csv_to_db(csv_path, db_path):
             if source_name:
                 sources_in_file.add(source_name)
             
-            # Check if URL already exists in database (unique identifier check)
-            cursor.execute('SELECT 1 FROM news_articles WHERE url = ? LIMIT 1', (row['url'],))
-            url_exists = cursor.fetchone() is not None
-            
-            if url_exists:
-                duplicate_count += 1
-                continue  # Skip this record as URL already exists
-            
             # Convert publishedAt to proper datetime format
             published_at = pd.to_datetime(row['publishedAt'], errors='coerce')
             if pd.isna(published_at):
@@ -112,7 +108,7 @@ def import_csv_to_db(csv_path, db_path):
             else:
                 published_at = published_at.strftime('%Y-%m-%d %H:%M:%S')
             
-            # Insert new record (URL is guaranteed to be unique at this point)
+            # Insert new record - let database handle URL uniqueness constraint
             cursor.execute('''
                 INSERT INTO news_articles 
                 (title, description, content, url, image, published_at, source_name, source_url)
@@ -130,6 +126,13 @@ def import_csv_to_db(csv_path, db_path):
             
             inserted_count += 1
                 
+        except sqlite3.IntegrityError as e:
+            # Handle duplicate URL (UNIQUE constraint violation)
+            if "UNIQUE constraint failed: news_articles.url" in str(e):
+                duplicate_count += 1
+            else:
+                print(f"  -> Integrity error processing row {index}: {e}")
+                error_count += 1
         except Exception as e:
             print(f"  -> Error processing row {index}: {e}")
             error_count += 1

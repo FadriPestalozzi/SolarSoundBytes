@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-JSON to SQL Data Import Script
-Imports Twitter data from JSON files into a SQLite database
+Import JSON Twitter data into SQLite DB via Git LFS
 """
 
 import json
@@ -25,6 +24,11 @@ def connect_to_database(db_path):
 def tweet_exists(cursor, tweet_id):
     """Check if a tweet with the given ID already exists in the database"""
     cursor.execute("SELECT 1 FROM tweets WHERE id = ? LIMIT 1", (tweet_id,))
+    return cursor.fetchone() is not None
+
+def user_exists(cursor, user_id):
+    """Check if a user with the given ID already exists in the database"""
+    cursor.execute("SELECT 1 FROM users WHERE id = ? LIMIT 1", (user_id,))
     return cursor.fetchone() is not None
 
 def create_tables(conn):
@@ -106,8 +110,9 @@ def parse_datetime(date_string):
         # Twitter format: "Sun Jan 02 23:56:57 +0000 2022"
         dt = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
         return dt.isoformat()
-    except ValueError:
-        return date_string
+    except ValueError as e:
+        logging.warning(f"Failed to parse datetime string: {date_string}. Error: {e}")
+        return None
 
 def insert_user(cursor, user_data):
     """Insert user data into users table"""
@@ -140,7 +145,7 @@ def insert_user(cursor, user_data):
     )
     
     cursor.execute("""
-        INSERT OR IGNORE INTO users (
+        INSERT INTO users (
             id, username, name, url, twitter_url, is_verified, is_blue_verified,
             profile_picture, cover_picture, description, location, followers,
             following, favourites_count, statuses_count, media_count, created_at,
@@ -153,9 +158,11 @@ def insert_tweet(cursor, tweet_data):
     if not tweet_data:
         return
     
-    # First insert the author if exists
+    # First insert the author if exists and not already in database
     if 'author' in tweet_data:
-        insert_user(cursor, tweet_data['author'])
+        author_data = tweet_data['author']
+        if author_data and author_data.get('id') and not user_exists(cursor, author_data['id']):
+            insert_user(cursor, author_data)
     
     tweet_values = (
         tweet_data.get('id'),
@@ -184,7 +191,7 @@ def insert_tweet(cursor, tweet_data):
     )
     
     cursor.execute("""
-        INSERT OR IGNORE INTO tweets (
+        INSERT INTO tweets (
             id, type, url, twitter_url, text, source, retweet_count, reply_count,
             like_count, quote_count, view_count, bookmark_count, created_at, lang,
             is_reply, in_reply_to_id, conversation_id, in_reply_to_user_id,
