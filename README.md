@@ -152,10 +152,10 @@ into global events where a significant change in sentiment is highly probable, a
 
 The resulting overview with reasoning based on verified refererences is
 available in a
-[pdf](<notes/Global-Events-Influencing-Renewable-Energy-Sentiment-(2022–2024).pdf>)
+[pdf](<website/pages/attachments/global_events_summary.pdf>)
 and summarized in the [table below](#global-events-table). For detailed
 references and reasoning, see the
-[Global Events PDF](<notes/Global-Events-Influencing-Renewable-Energy-Sentiment-(2022–2024).pdf>).
+[Global Events PDF](<website/pages/attachments/global_events_summary.pdf>).
 
 ## Global Events Table
 
@@ -171,10 +171,8 @@ references and reasoning, see the
 
 # 🎭 Sentiment Analysis using DistilBERT
 
-Raw data gathered from news articles and twitter is converted into sentiments (positive or negative) with a corresponding confidence score between 0.0 and 1.0. 
-
-<img src="images/svg/sentiment_analysis_twitter_and_news.excalidraw.svg" alt="sentiment_analysis_twitter_and_news" width="500"/>
-
+Raw news and Twitter data are classified as positive or negative sentiment. 
+Learn more [behind the scenes](documentation/DistilBERT/behind-the-scenes.md).
 
 
 # 🎉 Now it's Your Turn to Play!
@@ -192,6 +190,12 @@ After gathering this treasure chest of data it's up to you, dear user, to now pl
 If you're also super excited about [☀️Solar🔊Sound🍔Bytes](https://solar-sound-bytes.app/), here's how you can support our research effort! 
 
 Thank you for sharing your time and energy with us 🫀
+
+## Gitpod Online IDE
+
+You can open this project in a preconfigured Gitpod online IDE and edit, run, test, debug and commit directly from your browser.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/FadriPestalozzi/SolarSoundBytes)
 
 ## clone this repo to your computer
 
@@ -239,6 +243,7 @@ mkdir data
 
 - **API**: [Application Programming Interface](https://en.wikipedia.org/wiki/API) – a set of rules that allows
   different software applications to communicate with each other.
+- **CLS**: [Classification Token](https://stackoverflow.com/questions/62705268/why-bert-transformer-uses-cls-token-for-classification-instead-of-average-over?utm_source=chatgpt.com) – The first token of every sequence in BERT-like models; its final hidden state is used as the aggregate sequence representation for classification tasks.
 - **GBR**: [Great Britain](https://en.wikipedia.org/wiki/Great_Britain)
 - **GUI**: [Graphical User Interface](https://en.wikipedia.org/wiki/Graphical_user_interface) – a visual way of interacting with a
   computer using items like windows, icons, and buttons.

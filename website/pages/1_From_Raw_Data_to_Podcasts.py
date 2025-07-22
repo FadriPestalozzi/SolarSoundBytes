@@ -12,76 +12,108 @@ from shared_components import get_emoji_title, render_footer
 
 def header_section():
     """Display the main header and hero section"""
-    st.title("🔧 From Raw Data to Podcasts 🎧")
+    st.title("🔧 From Raw Data to User Podcasts 🎧")
     st.markdown(f"## Welcome to our {get_emoji_title()}🧑‍🍳Kitchen!")
     st.markdown("""
         Let us walk you through our journey of transforming years of
-        public opinion, official news, market metrics, and historical events
-        into a dynamic dashboard and time-traveling audio insights.
+        public opinion data, official news, market metrics, and historical events
+        into an interactive dashboard to create your very own audio insights.
         """)
+    st.markdown("---")
+
+def sentiment_analysis_intro():
+    """Introduction to sentiment analysis"""
+    st.header("🎯 What is Sentiment Analysis?")
+    
+    st.markdown("""
+    [Sentiment analysis](https://en.wikipedia.org/wiki/Sentiment_analysis) is a way of **classifying text by emotional tone** – for instance, 
+    telling whether a social‑media post sounds positive or negative.
+    
+    As part of [Natural Language Processing (NLP)](https://en.wikipedia.org/wiki/Natural_language_processing), 
+    sentiment analysis uses a **Transformer model** to extract the emotional tone embedded within a specific text.
+    
+    A Transformer is like a **group discussion**: every word "listens" to every other word to understand its context before speaking.
+    
+    Thanks to the so-called **self‑attention** (i.e. every word considering all other words), 
+    a Transformer can spot whether _"bright"_ refers to _a sunny day_ or _a clever idea_.
+    """)
+    
+    st.info("""
+    **💡 Key Insight**
+    
+    In SolarSoundBytes we use sentiment analysis to understand how people feel about **renewable energy** and **energy storage**.
+    
+    To visualize sentiment trends in the general public and in official news media over time, you can place this sentiment data into a broader context using our [interactive dashboard](/Interactive_Dashboard)!
+    """)
+    
     st.markdown("---")
 
 ####----Data Research Tab----####
 def data_research_tab():
     """Content for the Data Research tab"""
     st.header("📊 Data Research & Collection")
+    
+    st.subheader("""Main Questions:""")
+    st.write("""
+             - Where do we start?
+             - How do we find **trustworthy, high-quality data**?
+             - How can we ensure our data is **representative and unbiased**?
+             - Which **models are best suited** for sentiment analysis of tweets and news articles?
+             - How do we **visualize and interpret** the insights we uncover?
+    """)
 
-    col1, col2 = st.columns([2, 1])
+    st.subheader("Data Sources We Explored:")
+    st.write("""
+            To compare the sentiment of **news articles** to a broader **public sentiment**, we looked for a fitting twitter and news article datasets.
+            Both the **Climate Change Twitter Dataset (15 million tweets spanning over 13 years)** and the **Cleantech Media Dataset by Anacode** looked promising at first, but we could not use them due to several limitations:
+            - The lack of full-text tweets in the dataset.
+            - News articles were bias towards positive sentiment.""")
+    st.write("""
+            As we were advancing int our process, the Cleantech Media Dataset settled the timeframe of our data collection to **2022-01-02 to 2024-12-24**.
+            After extensive and unsuccessful further research for alternative datasets, we decided to create our own datasets for both, tweets and news articles
+            for a social media sentiment analysis using a scraping actor on [console.apify](https://console.apify.com/).
+             """)
+    st.write("### Twitter/X API")
+    st.write("""
+            To work with a user-friendly scraping GUI while keeping scraping costs below **40 USD/month**, the following scraper was chosen:
+            - Tweet Scraper|$0.25/1K Tweets | Pay-Per Result | No Rate Limits.
+                Search Terms:
+                - Renewable Energy
+                - Energy Storage
+             """)
 
+    st.write("### News Articles API")
+    st.write("""
+             The **News API** was our main tool to collect news articles covering many
+             - GNews 49,00€/month: API results in JSON format via HTTP GET requests.
+                Search Terms:
+                - Renewable Energy
+                - Energy Storage
+             """)
+
+    st.write("### Global Events")
+    st.markdown("""
+            Key global events with likely sentiment shifts were identified by conducting in-depth research
+            using [iterative ChatGPT-4.1 prompts](https://chatgpt.com/share/68495bc3-ee6c-8006-9816-8b0480a0bf3c). The output of our research on global events influencing renewable energy sentiment is shown below:
+            """)
+    
+    with open(os.path.join(os.path.dirname(__file__), "attachments", "global_events_summary.pdf"), "rb") as f:
+        st.download_button("📄 Download the research on global events likely influencing renewables sentiment (PDF)", f.read(), "global_events_summary.pdf", "application/pdf")
+
+    st.write("### Data Metrics")
+    
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.subheader("""Main Questions:""")
-        st.write("""
-                 - Where do we start?
-                 - How do we find **trustworthy, high-quality data**?
-                 - How can we ensure our data is **representative and unbiased**?
-                 - Which **models are best suited** for sentiment analysis of tweets and news articles?
-                 - How do we **visualize and interpret** the insights we uncover?
-        """)
-
-        st.subheader("Data Sources We Explored:")
-        st.write("""
-                To compare the sentiment of **news articles** to a broader **public sentiment**, we looked for a fitting twitter and news article datasets.
-                Both the **Climate Change Twitter Dataset (15 million tweets spanning over 13 years)** and the **Cleantech Media Dataset by Anacode** looked promising at first, but we could not use them due to several limitations:
-                - The lack of full-text tweets in the dataset.
-                - News articles were bias towards positive sentiment.""")
-        st.write("""
-                As we were advancing int our process, the Cleantech Media Dataset settled the timeframe of our data collection to **2022-01-02 to 2024-12-24**.
-                After extensive and unsuccessful further research for alternative datasets, we decided to create our own datasets for both, tweets and news articles
-                for a social media sentiment analysis using a scraping actor on [console.apify](https://console.apify.com/).
-                 """)
-        st.write("### Twitter/X API")
-        st.write("""
-                To work with a user-friendly scraping GUI while keeping scraping costs below **40 USD/month**, the following scraper was chosen:
-                - Tweet Scraper|$0.25/1K Tweets | Pay-Per Result | No Rate Limits.
-                    Search Terms:
-                    - Renewable Energy
-                    - Energy Storage
-                 """)
-
-        st.write("### News Articles API")
-        st.write("""
-                 The **News API** was our main tool to collect news articles covering many
-                 - GNews 49,00€/month: API results in JSON format via HTTP GET requests.
-                    Search Terms:
-                    - Renewable Energy
-                    - Energy Storage
-                 """)
-
-        st.write("### Global Events")
-        st.markdown("""
-                Key global events with likely sentiment shifts were identified by conducting in-depth research
-                using iterative ChatGPT-4.1 prompts. A summary is shown in the table in this [**link**](https://drive.google.com/file/d/16EfNelp-TF2qFCpzoPM9wJqfMXhSedhx/view?usp=sharing).
-                """)
-
-
-    with col2:
-        st.markdown("**Data Metrics**")
         st.metric("Tweets Analyzed", "130,000+")
+    with col2:
         st.metric("News Articles", "4,000+")
+    with col3:
         st.metric("Total Words Processed", "3M+")
-        #st.metric("Probability Score", "74.2%")
 
-        # Data volume chart
+    # Data volume chart
+    col1, col2 = st.columns(2)
+    
+    with col1:
         fig = go.Figure(data=go.Bar(
             x=['Tweets', 'News'],
             y=[136000, 4093],
@@ -94,7 +126,8 @@ def data_research_tab():
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # Text volume chart (in millions of words)
+    # Text volume chart (in millions of words)
+    with col2:
         twitts_words = 8 * 136000  # Each tweet ~10 words
         news_words = 500 * 4093     # Each news article ~500 words
         fig = go.Figure(data=go.Bar(
@@ -113,78 +146,191 @@ def data_research_tab():
 ####----NLP Models Tab----#####
 def nlp_models_tab():
     """Content for the NLP Models tab"""
-    st.header("🤖 NLP Models")
+    st.header("🤖 NLP Models & Model Selection")
 
-    st.write("A model in **Machine Learning** is like a ***recipe in cooking***. It takes raw ingredients (data) and transforms them into a delicious dish (insights).")
-    st.write("In our case, the ingredients are ***tweets and news articles***, and the dish is a ***podcast-style audio script*** that summarizes market sentiment.")
-    st.write("We didn't just pick the first model we found.")
+    st.markdown("""
+    During prototyping we benchmarked several transformer models, everyone of which can perform sentiment analysis. 
+    
+    Think of each model as a **recipe**: same ingredients (tweets & news) but different cooking styles that yield dishes of varying quality and cost.
+    
+    Here "**cost**" means the total inference cost of serving a sample batch of 100 k predictions on a standard cloud CPU (32 vCPU, 64 GB RAM) – a blend of runtime, memory footprint and resulting electricity/hosting bill.
+    By the way: inference cost is the amount a cloud provider bills you for **running (evaluating) a trained model on new data**, i.e. turning input data into predictions.
+    """)
 
+    st.subheader("🔍 Model Comparison")
+    
+    st.markdown("**Key Findings:**")
+    st.markdown("""
+    - 🎯 Although VADER is the cheapest model, it's inaccuracy renders it useless for us. 
+    - 💸 Generative models like Gemma3 are expensive and overkill for classification. 
+    - 🏆 DistilBERT turns out to be the best trade‑off between speed, memory and accuracy for both short tweets and longer news articles.
+    """)
 
-    st.subheader("Training, Test & Evaluate Models*")
+    # Model comparison table with exact data from documentation
     model_data = {
-    "Model / Tool": [
-        "distilBERT",
-        "twitter-RoBERTa",
-        "nlptown",
-        "VADER (NLTK)",
-        "Gemma 3 / Vertex AI",
-        "Custom DistilBERT Models (x3)"
-    ],
-    "Type": [
-        "Binary (Pos/Neg)",
-        "Positive / Negative / Neutral",
-        "Multilingual / Reviews",
-        "Positive / Negative / Neutral",
-        "Generative / Chat Model",
-        "Fine-tuned Transformer"
-    ],
-    "Notes": [
-        "★ Limited to 2 classes.",
-        "✓ Better suited for Twitter (short text)",
-        "✗ Optimized for product/movies reviews.",
-        "✗ Ignores word context and syntax.",
-        "✗ API unstable & evolving. Fine-tuning unsuccessful.",
-        "✔ Fine-tuned 3x. Minimal preprocessing. Weighted for negatives — Data bias discovered."
-    ],
-    "Accuracy": [
-        "High",
-        "High",
-        "Low",
-        "Low",
-        "Low",
-        "Low\n(due to data bias)"
-    ]}
+        "#": [0, 1, 2, 3, 4, 5],
+        "Model / Link": [
+            "DistilBERT",
+            "twitter‑RoBERTa",
+            "nlptown‑reviews",
+            "VADER (NLTK)",
+            "Gemma 3 / Vertex AI",
+            "Custom DistilBERT ×3"
+        ],
+        "Type": [
+            "Binary (Pos/Neg)",
+            "3‑way (Pos/Neu/Neg)",
+            "Multilingual / Reviews",
+            "3‑way rule‑based",
+            "Generative",
+            "Fine‑tuned Transformer"
+        ],
+        "Notes": [
+            "★ Limited to 2 classes.",
+            "✓ Great on very short text.",
+            "✗ Tuned for product & movie reviews.",
+            "✗ Ignores context, fails on sarcasm.",
+            "✗ API unstable; fine‑tuning failed.",
+            "✗ Fine-tuning failed due to biased data."
+        ],
+        "Accuracy": [
+            "High",
+            "High",
+            "Low",
+            "Low",
+            "Low",
+            "Medium"
+        ],
+        "Cloud Cost": [
+            "$ 1.20",
+            "$ 2.10",
+            "$ 1.70",
+            "$ 0.05",
+            "$ 9.80",
+            "$ 1.45"
+        ]
+    }
 
     model_df = pd.DataFrame(model_data)
-    st.table(model_df.reset_index(drop=True))
- # Map accuracy to numeric for plotting
- #   with col2:
- #       accuracy_map = {"High": 2, "Low": 1}
- #       df_plot = pd.DataFrame(model_data).copy()
- #       df_plot["Accuracy (Num)"] = df_plot["Accuracy"].apply(lambda x: accuracy_map["High"] if "High" in x else accuracy_map["Low"])
- #       df_plot["Accuracy Label"] = df_plot["Accuracy"].apply(lambda x: "High" if "High" in x else "Low")
-#
- #       # Plot
- #       plt.figure(figsize=(7, 4))
- #       bar = sns.barplot(
- #       data=df_plot,
- #       y="Model / Tool",
- #       x="Accuracy (Num)",
- #       hue="Accuracy Label",
- #       dodge=False,
- #       palette={"High": "#2ECC71", "Low": "#E74C3C"}
- #       )
- #       bar.set_xlabel("Accuracy Level")
- #       bar.set_ylabel("Model / Tool")
- #       bar.set_xticks([1, 2])
- #       bar.set_xticklabels(["Low", "High"])
- #       plt.title("Sentiment Model Accuracy")
- #        plt.legend(title="Accuracy", loc="lower right")
- #       plt.tight_layout()
- #      st.pyplot(plt)
+    st.dataframe(model_df, hide_index=True)
+
+    # What is DistilBERT section
+    st.subheader("🤖 What is DistilBERT?")
+    
+    st.markdown("""
+    Based on its large and expensive [BERT "teacher" model](https://huggingface.co/docs/transformers/en/model_doc/bert), 
+    the [DistilBERT "student" model](https://huggingface.co/docs/transformers/model_doc/distilbert) 
+    is a transformer representing the embedded NLP knowledge in a more efficient and compact way.
+    
+    **Key Features:**
+    - **Compact:** 66M parameters (40% fewer than BERT) yet ~97% of its language grasp; ~60% faster
+    - **Well‑maintained:** DistilBERT is part of the Hugging Face ecosystem
+    - **Economical:** can serve predictions in < 25 ms per sentence on a 2024 M2 Pro laptop
+    """)
+    
+    st.info("""
+    **📊 BERT Training Data**
+    
+    **BooksCorpus:** ≈ 800M words
+    **English Wikipedia:** ≈ 2.5B words
+    
+    **Total:** ~3.3B words
+    """)
 
 
-    st.success("🏆 **Winner: distilBERT Model** - Best balance of accuracy for both short and long text")
+
+def distilbert_process_tab():
+    """Content for the DistilBERT Process tab"""
+    st.header("🔍 Step‑by‑Step: How DistilBERT Works")
+    
+    st.markdown("""
+    This section guides you through the sentiment analysis of the sentence: "Love this gizmo!"
+    
+    After Step 2, DistilBERT has produced a 768‑D "fingerprint" (the [CLS] vector) that encodes the whole sentence's meaning.  
+    Steps 3–5 turn that abstract fingerprint into a concrete Positive / Negative label.
+    """)
+
+    # Step-by-step process
+    steps = [
+        {
+            "title": "1️⃣ Tokenisation – \"chopping text into tokens\"",
+            "description": """Prior to its analysis, an input text is divided into chunks, a.k.a. tokens. 
+            Each chunk has an associated ID-number and represents a unique meaning.
+            
+            A tokenized text starts with a classification-token (CLS, ID=101) and ends with a separator-token (SEP, ID=102).
+            
+            Regular WordPiece-tokens come after the first 100 reserved indices and the special tokens (CLS, SEP, MASK) and are ordered by frequency.""",
+            "example": """Input: Love this gizmo!
+            
+Tokens: ['[CLS]', 'love', 'this', 'g', '##iz', '##mo', '!', '[SEP]']
+
+Token IDs: [101, 3862, 2023, 2290, 12770, 2213, 999, 102]
+
+Note: The rare word "gizmo" is split into g + ##iz + ##mo.  
+Because 2023 < 3862, the token "this" occurs more often than "love" in the pre-training corpus."""
+        },
+        {
+            "title": "2️⃣ Encoding – \"group discussion\"",
+            "description": """The ID-numbers are fed through 6 Transformer layers. 
+            Each layer lets every word listen to every other word and update its meaning.
+            
+            Every Transformer layer in DistilBERT outputs a vector with 768 numbers (=dimensions) per token.
+            
+            The final hidden state of [CLS] becomes a 768‑digit-long numeric fingerprint which encodes the meaning of the entire input text.""",
+            "example": """One dimension (e.g. #512) might measure positivity, another (e.g. #233) might light up for energy gadgets.
+
+Like the way mixing red & green gives yellow, combining many dimensions encodes subtle meaning.
+
+Important: The coordinate indices in a 768-dimensional DistilBERT vector carry no fixed meaning. 
+
+Any semantic signal can end up aligned with any combination of axes."""
+        },
+        {
+            "title": "3️⃣ Classification head – \"opinion poll\"",
+            "description": """The fingerprint of the entire input text is fed into a tiny neural layer (768 inputs → 2 outputs) which multiplies each of the 768 numbers by a learned weight and adds a bias.
+            
+            The two resulting values are called logits.
+            These logits can be interpreted as votes - one for negative, one for positive.
+            
+            Why logits first? Logits separate "scoring" from "probability making." They let the model learn unbounded linear scores without worrying about the 0‑1 range during training. Each weight tells how strongly a fingerprint dimension pushes toward Positive or Negative.""",
+            "example": """Imagine two judges—one rooting for Negative, one for Positive. 
+Each judge scans the fingerprint, sums up the signals they care about, and produces a raw score.
+
+Logits: [neg, pos] → [-1.43, 1.25]
+
+Behind the scenes: During fine‑tuning, the model automatically adjusts those 768×2 weights so the final decision aligns with your training labels."""
+        },
+        {
+            "title": "4️⃣ Softmax – \"turn votes into odds\"",
+            "description": """Softmax takes the two logits, exponentiates them, and divides by their sum so the outputs become probabilities that add up to 1.
+            
+            Why probabilities later? Softmax normalises the unbounded logit scores only at the very end, giving a clean probabilistic interpretation that's easy to understand and compare.""",
+            "example": """It's like converting the judges' raw scores into betting odds you can actually compare.
+
+1. Exponentiate each logit: e^(-1.43) ≈ 0.2393, e^(1.25) ≈ 3.4903
+2. Sum the exponentials: 0.2393 + 3.4903 = 3.7296
+3. Divide each exp by the sum: 
+   - 0.2393 / 3.7296 = 0.064
+   - 3.4903 / 3.7296 = 0.936
+
+Result: neg = 6.4%, pos = 93.6%"""
+        },
+        {
+            "title": "5️⃣ Decision – \"pick the winner\"",
+            "description": """Whichever probability is higher is the model's answer; we log the confidence too.
+            
+            The label with the higher probability is returned, and the probability itself is logged as confidence.""",
+            "example": """Highest value: 0.936
+
+Model output: Text sentiment is positive with 93.6% confidence"""
+        }
+    ]
+
+    for step in steps:
+        with st.expander(step["title"]):
+            st.markdown(step["description"])
+            if "example" in step:
+                st.info(f"**Example:** {step['example']}")
 
 ####----Pipeline Tab----#####
 def pipeline_tab():
@@ -195,7 +341,7 @@ def pipeline_tab():
 
     # Pipeline steps
     pipeline_steps = [
-        ("🔍 Data Scraping", "Collect tweets and news articles"),
+        ("🔍 Data Collection", "Gather tweets and news articles"),
         ("🧹 Text Cleaning", "Remove noise, normalize text"),
         ("🤖 Sentiment Analysis", "Apply our trained NLP model"),
         ("📊 Data Aggregation", "Merge sentiment insights from tweets and news with market (S&P 500) and economic (GDP) data to reveal the bigger picture."),
@@ -211,7 +357,7 @@ def pipeline_tab():
             if i == 1:
                 st.markdown("[**Twitter API user story**](https://drive.google.com/file/d/1uVTl7SvQNJE00I0GaDez2XCjw0byp4j7/view?usp=sharing)")
                 st.code("""
-            def extract_tweet_data(tweet, reference_date):
+def extract_tweet_data(tweet, reference_date):
     def safe_get(dct, key, default=None):
         return dct.get(key, default)
 
@@ -230,10 +376,8 @@ def pipeline_tab():
 
                 st.markdown("[**News Articles API user story**](https://drive.google.com/file/d/1LsZA_0e8LvhuxZZMg6myaI6gNTh1d0-e/view?usp=sharing)")
                 st.code("""
-                        def articles_api_2_csv(t_start_str: str, t_end_str: str, query: str, query_subdivisions: int = 1):
-
+def articles_api_2_csv(t_start_str: str, t_end_str: str, query: str, query_subdivisions: int = 1):
     # --------------------- API call ---------------------
-
     # load API key and plan-specific max_n_articles from .env file
     load_dotenv()
     API_KEY = os.getenv("GNEWS_API_KEY")
@@ -241,79 +385,107 @@ def pipeline_tab():
 
     if not API_KEY:
         raise ValueError("GNEWS_API_KEY not found in environment variables.")
-                        """)
+                        """, language='python')
 
             elif i == 2:
                 st.code("""
-            def preprocess_text(text):
-                text = text.lower()
-                text = re.sub(r".*'name':\s*'([^']+)'.*", r'\1', text)
-                text = re.sub(r'^name\s+(.+?)\s+url\s+https.*', r'\1', text)
-                tokens = text.split()
-                return ' '.join(tokens)
+def preprocess_text(text):
+    text = text.lower()
+    text = re.sub(r".*'name':\\s*'([^']+)'.*", r'\\1', text)
+    text = re.sub(r'^name\\s+(.+?)\\s+url\\s+https.*', r'\\1', text)
+    tokens = text.split()
+    return ' '.join(tokens)
 
-                # Apply preprocessing to text columns
-                text_columns = ['title', 'description', 'source', 'content']
-                for col in text_columns:
-                    df[f'Clean_{col.capitalize()}'] = df[col].apply(preprocess_text)
+# Apply preprocessing to text columns
+text_columns = ['title', 'description', 'source', 'content']
+for col in text_columns:
+    df[f'Clean_{col.capitalize()}'] = df[col].apply(preprocess_text)
 
-                # Clean and format date
-                df['Clean_Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.strftime('%Y-%m-%d')
+# Clean and format date
+df['Clean_Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.strftime('%Y-%m-%d')
 
-                # Create clean dataframe by dropping original columns
-                columns_to_drop = ['url', 'image', 'publishedAt', 'title', 'description', 'content', 'source', 'Date']
-                df_clean = df.drop(columns=columns_to_drop)
+# Create clean dataframe by dropping original columns
+columns_to_drop = ['url', 'image', 'publishedAt', 'title', 'description', 'content', 'source', 'Date']
+df_clean = df.drop(columns=columns_to_drop)
 
-                df_clean.head()
+df_clean.head()
                             """, language='python')
 
             elif i == 3:
                 st.code("""
-                sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-                df_sample = df_clean.sample(n=100, random_state=42).copy()
+sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+df_sample = df_clean.sample(n=100, random_state=42).copy()
 
-                df_sample[['Sentiment', 'Score']] = df_sample['Clean Article Text'].apply(analyze_sentiment_chunked)
-                df_sample.head()
-                    }
+df_sample[['Sentiment', 'Score']] = df_sample['Clean Article Text'].apply(analyze_sentiment_chunked)
+df_sample.head()
                 """, language='python')
 
             elif i == 5:
                 st.code("""
-                client = OpenAI(api_key = api_key)
-                response = client.chat.completions.create(
-                    model="gpt-4o",  #
-                    messages=[
-                        {"role": "system", "content": "You are a data-analytical journalist."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.2,
-                    max_tokens=1000
-                )""", language='python')
+client = OpenAI(api_key = api_key)
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a data-analytical journalist."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.2,
+    max_tokens=1000
+)""", language='python')
 
             elif i == 6:
                 st.code("""
-                if st.button("Play"):
-                if isinstance(text, str) and text.strip():
-                    tts = gTTS(text.strip(), lang="en")
-                    tts.save("output.mp3")
-                    st.audio("output.mp3", format="audio/mp3")
-                else:
-                    st.warning("Text field is empty or invalid.")
+if st.button("Play"):
+    if isinstance(text, str) and text.strip():
+        tts = gTTS(text.strip(), lang="en")
+        tts.save("output.mp3")
+        st.audio("output.mp3", format="audio/mp3")
+    else:
+        st.warning("Text field is empty or invalid.")
                 """, language='python')
 
+def limitations_tab():
+    """Content for the Limitations tab"""
+    st.header("⚠️ Limitations to Keep in Mind")
+    
+    limitations = [
+        {
+            "title": "🎭 Sarcasm & Irony",
+            "description": "Sarcasm and irony remain hard to detect, even for large transformer models. Context and tone are crucial for humans but challenging for AI.",
+            "example": "Tweet: 'Great, another power outage! 🙄' might be classified as positive due to the word 'Great'"
+        },
+        {
+            "title": "🔄 Domain Shift",
+            "description": "New slang, emerging topics, or shifts in language use require model re-training to maintain accuracy.",
+            "example": "New renewable energy terminology or changing public discourse patterns may not be captured"
+        },
+        {
+            "title": "📱 Ultra‑short Texts",
+            "description": "Single emojis or very short messages give little semantic context, leading to unreliable predictions.",
+            "example": "A single '⚡' emoji provides insufficient context for reliable sentiment classification"
+        }
+    ]
+    
+    for limitation in limitations:
+        with st.expander(limitation["title"]):
+            st.markdown(limitation["description"])
+            if "example" in limitation:
+                st.info(f"**Example:** {limitation['example']}")
 
+def final_assembly_tab():
     """Content for the Final Assembly tab"""
     st.header("🚀 Final Assembly & Integration")
 
     st.subheader("Bringing It All Together with Streamlit")
 
+    # Create two columns for Architecture Overview and Technical Stack
     col1, col2 = st.columns(2)
-
+    
     with col1:
         st.markdown("**Architecture Overview:**")
         st.write("• **Frontend**: Streamlit web application")
         st.write("• **Backend**: Python data processing pipeline")
-        st.write("• **Database**: Sentiment anailysis")
+        st.write("• **Database**: Sentiment analysis results")
         st.write("• **APIs**: External data sources integration")
         st.write("• **Deployment**: Cloud-based hosting")
 
@@ -333,10 +505,13 @@ def pipeline_tab():
 
 def main_tabs():
     """Display the main content tabs"""
-    tab1, tab2, tab3, = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Data Research",
         "🤖 NLP Models",
-        "⚙️ Pipeline"
+        "🔍 DistilBERT Process",
+        "⚙️ Pipeline",
+        "⚠️ Limitations",
+        "🚀 Final Assembly"
     ])
 
     with tab1:
@@ -346,13 +521,21 @@ def main_tabs():
         nlp_models_tab()
 
     with tab3:
+        distilbert_process_tab()
+
+    with tab4:
         pipeline_tab()
 
+    with tab5:
+        limitations_tab()
 
+    with tab6:
+        final_assembly_tab()
 
 def render_behind_scenes():
     """Render function for importing into other pages"""
     header_section()
+    sentiment_analysis_intro()
     main_tabs()
     render_footer()
 
