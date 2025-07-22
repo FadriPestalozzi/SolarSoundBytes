@@ -273,15 +273,18 @@ def import_json_data(json_file_path, db_path):
 def main():
     """Main execution function"""
     # Define file paths
-    json_file_path = "data/json/day_02/2022/dataset_2022-01-02_2025-06-03_22-22-56-837.json"
-    db_path = "database/db-twitter.db"  
-    
+    import glob
+
+    db_path = "database/db-twitter.db"
+    json_files = glob.glob("data/json/**/*.json", recursive=True)
+
     print("Starting Twitter data import...")
-    print(f"Source JSON: {json_file_path}")
+    print(f"Found {len(json_files)} JSON files in data/json/")
     print(f"Target Database: {db_path}")
-    
-    # Import the data
-    import_json_data(json_file_path, db_path)
+
+    for json_file_path in json_files:
+        print(f"Importing: {json_file_path}")
+        import_json_data(json_file_path, db_path)
     
     print("Data import completed successfully!")
 
