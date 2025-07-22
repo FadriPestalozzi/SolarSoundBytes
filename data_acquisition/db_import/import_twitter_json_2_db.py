@@ -10,6 +10,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+import glob
 
 def connect_to_database(db_path):
     """Create connection to SQLite database"""
@@ -273,8 +274,6 @@ def import_json_data(json_file_path, db_path):
 def main():
     """Main execution function"""
     # Define file paths
-    import glob
-
     db_path = "database/db-twitter.db"
     json_files = glob.glob("data/json/**/*.json", recursive=True)
 

@@ -4,6 +4,7 @@ import json
 import os
 import glob
 from datetime import datetime
+import re
 
 
 def create_database_schema(db_path):
@@ -44,9 +45,8 @@ def parse_source_json(source_str):
             json_str = source_str.replace("'", '"')
             source_data = json.loads(json_str)
             return source_data.get('name', ''), source_data.get('url', '')
-        except:
+        except Exception:
             # If all parsing fails, try to extract manually using regex
-            import re
             name_match = re.search(r"'name':\s*'([^']+)'", source_str)
             url_match = re.search(r"'url':\s*'([^']+)'", source_str)
             name = name_match.group(1) if name_match else ''
@@ -98,8 +98,8 @@ def import_csv_to_db(csv_path, db_path):
                 sources_in_file.add(source_name)
             
             # Check if URL already exists in database (unique identifier check)
-            cursor.execute('SELECT COUNT(*) FROM news_articles WHERE url = ?', (row['url'],))
-            url_exists = cursor.fetchone()[0] > 0
+            cursor.execute('SELECT 1 FROM news_articles WHERE url = ? LIMIT 1', (row['url'],))
+            url_exists = cursor.fetchone() is not None
             
             if url_exists:
                 duplicate_count += 1
