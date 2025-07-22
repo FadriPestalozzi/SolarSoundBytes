@@ -97,6 +97,14 @@ def import_csv_to_db(csv_path, db_path):
             if source_name:
                 sources_in_file.add(source_name)
             
+            # Check if URL already exists in database (unique identifier check)
+            cursor.execute('SELECT COUNT(*) FROM news_articles WHERE url = ?', (row['url'],))
+            url_exists = cursor.fetchone()[0] > 0
+            
+            if url_exists:
+                duplicate_count += 1
+                continue  # Skip this record as URL already exists
+            
             # Convert publishedAt to proper datetime format
             published_at = pd.to_datetime(row['publishedAt'], errors='coerce')
             if pd.isna(published_at):
@@ -104,9 +112,9 @@ def import_csv_to_db(csv_path, db_path):
             else:
                 published_at = published_at.strftime('%Y-%m-%d %H:%M:%S')
             
-            # Insert into database
+            # Insert new record (URL is guaranteed to be unique at this point)
             cursor.execute('''
-                INSERT OR IGNORE INTO news_articles 
+                INSERT INTO news_articles 
                 (title, description, content, url, image, published_at, source_name, source_url)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
@@ -120,10 +128,7 @@ def import_csv_to_db(csv_path, db_path):
                 source_url
             ))
             
-            if cursor.rowcount > 0:
-                inserted_count += 1
-            else:
-                duplicate_count += 1
+            inserted_count += 1
                 
         except Exception as e:
             print(f"  -> Error processing row {index}: {e}")
