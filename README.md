@@ -20,8 +20,8 @@ during a [9-week bootcamp at Le Wagon](https://www.lewagon.com/barcelona/data-sc
 
 Sentiment analysis is a well-known Natural Language Processing (NLP) technique used to determine the emotional tone of a text, classifying it as either positive, negative, or neutral. 
 
-- The sentiment of the general public is being inferred by performing sentiment analysis on **130k+ tweets (TODO link to dataset description)**. 
-- Analogously, the sentiment of official channels is derived by sentiment analysis on **4k+ news articles (TODO link to dataset description)**. 
+- The sentiment of the general public is being inferred by performing sentiment analysis on **129,756 tweets from 72,088 users (TODO link to dataset description)**. 
+- Analogously, the sentiment of official channels is derived by sentiment analysis on **4,093 news articles from 186 unique sources (TODO link to dataset description)**. 
 
 By feeding the sentiment analysis results of these 2 datasets into an [interactive dashboard](https://solar-sound-bytes.app/dashboard), the user is empowered to perform an independent investigation and identify possible correlations between public and official sentiments as well as compare those sentiments with additional metrics. 
 
