@@ -25,6 +25,7 @@ def create_database_schema(db_path):
             title TEXT NOT NULL,
             description TEXT,
             content TEXT,
+            character_count INTEGER,
             url TEXT UNIQUE,
             image TEXT,
             published_at TIMESTAMP,
@@ -108,15 +109,20 @@ def import_csv_to_db(csv_path, db_path):
             else:
                 published_at = published_at.strftime('%Y-%m-%d %H:%M:%S')
             
+            # Calculate character count of content
+            content_text = row['content'] if pd.notna(row['content']) else ''
+            char_count = len(content_text)
+            
             # Insert new record - let database handle URL uniqueness constraint
             cursor.execute('''
                 INSERT INTO news_articles 
-                (title, description, content, url, image, published_at, source_name, source_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (title, description, content, character_count, url, image, published_at, source_name, source_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 row['title'],
                 row['description'],
                 row['content'],
+                char_count,
                 row['url'],
                 row['image'],
                 published_at,

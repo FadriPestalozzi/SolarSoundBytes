@@ -7,6 +7,7 @@ import json
 import sqlite3
 import os
 import sys
+import logging
 from datetime import datetime
 from pathlib import Path
 import glob
@@ -71,6 +72,7 @@ def create_tables(conn):
             url TEXT,
             twitter_url TEXT,
             text TEXT,
+            character_count INTEGER,
             source TEXT,
             retweet_count INTEGER DEFAULT 0,
             reply_count INTEGER DEFAULT 0,
@@ -164,12 +166,17 @@ def insert_tweet(cursor, tweet_data):
         if author_data and author_data.get('id') and not user_exists(cursor, author_data['id']):
             insert_user(cursor, author_data)
     
+    # Calculate character count of tweet text
+    tweet_text = tweet_data.get('text', '')
+    char_count = len(tweet_text) if tweet_text else 0
+    
     tweet_values = (
         tweet_data.get('id'),
         tweet_data.get('type'),
         tweet_data.get('url'),
         tweet_data.get('twitterUrl'),
         tweet_data.get('text'),
+        char_count,
         tweet_data.get('source'),
         tweet_data.get('retweetCount', 0),
         tweet_data.get('replyCount', 0),
@@ -192,12 +199,12 @@ def insert_tweet(cursor, tweet_data):
     
     cursor.execute("""
         INSERT INTO tweets (
-            id, type, url, twitter_url, text, source, retweet_count, reply_count,
+            id, type, url, twitter_url, text, character_count, source, retweet_count, reply_count,
             like_count, quote_count, view_count, bookmark_count, created_at, lang,
             is_reply, in_reply_to_id, conversation_id, in_reply_to_user_id,
             in_reply_to_username, is_pinned, author_id, search_term_index,
             is_conversation_controlled
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, tweet_values)
 
 def import_json_data(json_file_path, db_path):
