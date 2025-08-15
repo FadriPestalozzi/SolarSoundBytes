@@ -5,6 +5,9 @@ Update character_count column for existing data in both databases
 
 import sqlite3
 import os
+
+# Import shared utilities
+from utilities import get_db_path, get_news_db_path
 import sys
 
 
@@ -203,12 +206,9 @@ def main():
     print("This script will add character counts to existing data in your databases")
     print("Only records with NULL character_count will be updated")
     
-    # Define paths relative to script location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.join(script_dir, '..', '..')
-    
-    news_db_path = os.path.join(project_root, 'database', 'db-news-articles.db')
-    twitter_db_path = os.path.join(project_root, 'database', 'db-twitter.db')
+    # Define paths using shared utilities
+    news_db_path = get_news_db_path()
+    twitter_db_path = get_db_path()
     
     print(f"\nTarget databases:")
     print(f"- News: {news_db_path}")

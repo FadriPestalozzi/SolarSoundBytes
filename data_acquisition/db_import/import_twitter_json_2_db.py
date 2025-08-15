@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 """
 Import JSON Twitter data into SQLite DB via Git LFS
+
+This script imports Twitter data from JSON files into a SQLite database.
+It supports optional geocoding of user locations using OpenAI's API.
+
+USAGE:
+- Basic import:           python import_twitter_json_2_db.py
+- With geocoding:         python import_twitter_json_2_db.py --geocode
+
+GEOCODING SETUP:
+1. Set your OpenAI API key: export OPENAI_API_KEY="your-api-key-here"
+2. Optional: Set model: export OPENAI_MODEL="gpt-4o-mini" (default) or "gpt-4"
+
+The script automatically:
+- Creates database tables with geocoding columns (latitude, longitude, location-checked)
+- Processes JSON files from data/json/ directory
+- Skips duplicate tweets
+- Optionally geocodes user locations during import (requires --geocode flag)
+- Provides import statistics including geocoding counts
 """
 
 import json
@@ -11,6 +29,12 @@ import logging
 from datetime import datetime
 from pathlib import Path
 import glob
+from typing import Optional, Tuple
+
+# Import shared utilities and location functions
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'db_update'))
+from utilities import get_db_path
+from location_api_call import call_chatgpt_for_geocode, ensure_geolocation_columns
 
 def connect_to_database(db_path):
     """Create connection to SQLite database"""
@@ -50,6 +74,9 @@ def create_tables(conn):
             cover_picture TEXT,
             description TEXT,
             location TEXT,
+            latitude REAL,
+            longitude REAL,
+            "location-checked" INTEGER DEFAULT 0,
             followers INTEGER DEFAULT 0,
             following INTEGER DEFAULT 0,
             favourites_count INTEGER DEFAULT 0,
@@ -101,6 +128,9 @@ def create_tables(conn):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_tweets_conversation_id ON tweets(conversation_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
     
+    # Ensure geolocation columns exist (for existing databases)
+    ensure_geolocation_columns(conn)
+    
     conn.commit()
     print("Database tables created successfully")
 
@@ -116,10 +146,24 @@ def parse_datetime(date_string):
         logging.warning(f"Failed to parse datetime string: {date_string}. Error: {e}")
         return None
 
-def insert_user(cursor, user_data):
-    """Insert user data into users table"""
+def insert_user(cursor, user_data, enable_geocoding=False):
+    """Insert user data into users table with optional geocoding"""
     if not user_data:
-        return
+        return False
+    
+    # Get location data and optionally geocode it
+    location_text = user_data.get('location')
+    latitude = None
+    longitude = None
+    location_checked = 0
+    geocoded = False
+    
+    if enable_geocoding and location_text and location_text.strip():
+        coords = call_chatgpt_for_geocode(location_text)
+        if coords is not None:
+            latitude, longitude = coords
+            geocoded = True
+        location_checked = 1  # Mark as checked regardless of success
     
     user_values = (
         user_data.get('id'),
@@ -132,7 +176,10 @@ def insert_user(cursor, user_data):
         user_data.get('profilePicture'),
         user_data.get('coverPicture'),
         user_data.get('description'),
-        user_data.get('location'),
+        location_text,
+        latitude,
+        longitude,
+        location_checked,
         user_data.get('followers', 0),
         user_data.get('following', 0),
         user_data.get('favouritesCount', 0),
@@ -149,22 +196,26 @@ def insert_user(cursor, user_data):
     cursor.execute("""
         INSERT INTO users (
             id, username, name, url, twitter_url, is_verified, is_blue_verified,
-            profile_picture, cover_picture, description, location, followers,
-            following, favourites_count, statuses_count, media_count, created_at,
-            can_dm, can_media_tag, has_custom_timelines, is_translator, possibly_sensitive
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            profile_picture, cover_picture, description, location, latitude, longitude,
+            "location-checked", followers, following, favourites_count, statuses_count, 
+            media_count, created_at, can_dm, can_media_tag, has_custom_timelines, 
+            is_translator, possibly_sensitive
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, user_values)
+    
+    return geocoded
 
-def insert_tweet(cursor, tweet_data):
+def insert_tweet(cursor, tweet_data, enable_geocoding=False):
     """Insert tweet data into tweets table"""
     if not tweet_data:
-        return
+        return False
     
+    geocoded = False
     # First insert the author if exists and not already in database
     if 'author' in tweet_data:
         author_data = tweet_data['author']
         if author_data and author_data.get('id') and not user_exists(cursor, author_data['id']):
-            insert_user(cursor, author_data)
+            geocoded = insert_user(cursor, author_data, enable_geocoding)
     
     # Calculate character count of tweet text
     tweet_text = tweet_data.get('text', '')
@@ -206,8 +257,10 @@ def insert_tweet(cursor, tweet_data):
             is_conversation_controlled
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, tweet_values)
+    
+    return geocoded
 
-def import_json_data(json_file_path, db_path):
+def import_json_data(json_file_path, db_path, enable_geocoding=False):
     """Main function to import JSON data into database"""
     
     # Validate file paths
@@ -234,6 +287,7 @@ def import_json_data(json_file_path, db_path):
             total_records = len(data)
             imported_count = 0
             skipped_count = 0
+            geocoded_count = 0
             print(f"Found {total_records} records to process")
             
             for i, item in enumerate(data, 1):
@@ -246,8 +300,10 @@ def import_json_data(json_file_path, db_path):
                         elif skipped_count == 4:
                             print("... (suppressing further duplicate messages)")
                     else:
-                        insert_tweet(cursor, item)
+                        was_geocoded = insert_tweet(cursor, item, enable_geocoding)
                         imported_count += 1
+                        if was_geocoded:
+                            geocoded_count += 1
                 
                 # Progress indicator
                 if i % 100 == 0:
@@ -270,6 +326,8 @@ def import_json_data(json_file_path, db_path):
             print(f"- Duplicate tweets skipped: {skipped_count}")
             print(f"- Total tweets in database: {total_tweets_in_db}")
             print(f"- Users in database: {user_count}")
+            if enable_geocoding:
+                print(f"- User locations geocoded: {geocoded_count}")
             
         else:
             print("Error: JSON data is not in expected array format")
@@ -287,17 +345,44 @@ def import_json_data(json_file_path, db_path):
 
 def main():
     """Main execution function"""
+    # Parse command line arguments
+    enable_geocoding = False
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--geocode" or sys.argv[1] == "-g":
+            enable_geocoding = True
+            print("Geocoding enabled for user locations")
+        elif sys.argv[1] == "--help" or sys.argv[1] == "-h":
+            print("Usage: python import_twitter_json_2_db.py [--geocode | -g]")
+            print("Options:")
+            print("  --geocode, -g    Enable location geocoding during import")
+            print("                   Requires OPENAI_API_KEY environment variable")
+            print("  --help, -h       Show this help message")
+            sys.exit(0)
+        else:
+            print(f"Unknown argument: {sys.argv[1]}")
+            print("Use --help for usage information")
+            sys.exit(1)
+    
+    # Check geocoding requirements
+    if enable_geocoding:
+        if not os.getenv("OPENAI_API_KEY"):
+            print("Error: Geocoding requires OPENAI_API_KEY environment variable")
+            print("Set your API key: export OPENAI_API_KEY='your-key-here'")
+            sys.exit(1)
+        print("Note: Geocoding will use OpenAI API calls and may incur costs")
+    
     # Define file paths
-    db_path = "database/db-twitter.db"
+    db_path = get_db_path()
     json_files = glob.glob("data/json/**/*.json", recursive=True)
 
     print("Starting Twitter data import...")
     print(f"Found {len(json_files)} JSON files in data/json/")
     print(f"Target Database: {db_path}")
+    print(f"Geocoding: {'Enabled' if enable_geocoding else 'Disabled'}")
 
     for json_file_path in json_files:
         print(f"Importing: {json_file_path}")
-        import_json_data(json_file_path, db_path)
+        import_json_data(json_file_path, db_path, enable_geocoding)
     
     print("Data import completed successfully!")
 

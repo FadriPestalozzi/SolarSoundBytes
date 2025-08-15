@@ -5,6 +5,9 @@ Add character_count column to existing database tables
 
 import sqlite3
 import os
+
+# Import shared utilities
+from utilities import get_db_path, get_news_db_path
 import sys
 
 
@@ -136,12 +139,9 @@ def main():
     print("=== ADD CHARACTER_COUNT COLUMNS SCRIPT ===")
     print("This script will add character_count columns to existing database tables")
     
-    # Define paths relative to script location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.join(script_dir, '..', '..')
-    
-    news_db_path = os.path.join(project_root, 'database', 'db-news-articles.db')
-    twitter_db_path = os.path.join(project_root, 'database', 'db-twitter.db')
+    # Define paths using shared utilities
+    news_db_path = get_news_db_path()
+    twitter_db_path = get_db_path()
     
     print(f"\nTarget databases:")
     print(f"- News: {news_db_path}")
