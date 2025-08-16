@@ -44,10 +44,10 @@ from utilities import get_project_root, get_db_path, progress_bar
 # Import location-related functions from shared module
 from location_api_call import (
     call_chatgpt_for_geocode, 
-    ensure_geolocation_columns, 
-    ensure_location_checked_column,
-    fetch_users_needing_geocoding,
-    update_user_coordinates
+    ensure_tweet_geolocation_columns, 
+    ensure_tweet_location_checked_column,
+    fetch_tweet_users_needing_geocoding,
+    update_tweet_user_coordinates
 )
 
 
@@ -85,9 +85,9 @@ def main() -> None:
 	db_path = get_db_path()
 	connection = sqlite3.connect(db_path)
 	try:
-		ensure_geolocation_columns(connection)
-		ensure_location_checked_column(connection)
-		rows = fetch_users_needing_geocoding(connection, test_limit, test_offset)
+		ensure_tweet_geolocation_columns(connection)
+		ensure_tweet_location_checked_column(connection)
+		rows = fetch_tweet_users_needing_geocoding(connection, test_limit, test_offset)
 		
 		total_rows = len(rows)
 		api_calls = 0
@@ -116,7 +116,7 @@ def main() -> None:
 				connection.commit()
 				continue
 			lat, lon = coords
-			update_user_coordinates(connection, user_id, lat, lon)
+			update_tweet_user_coordinates(connection, user_id, lat, lon)
 			geocoded_count += 1
 			connection.execute('UPDATE users SET "location-checked" = 1 WHERE id = ?', (user_id,))
 			connection.commit()

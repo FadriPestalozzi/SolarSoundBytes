@@ -34,7 +34,7 @@ from typing import Optional, Tuple
 # Import shared utilities and location functions
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'db_update'))
 from utilities import get_db_path
-from location_api_call import call_chatgpt_for_geocode, ensure_geolocation_columns
+from location_api_call import call_chatgpt_for_geocode, ensure_tweet_geolocation_columns
 
 def connect_to_database(db_path):
     """Create connection to SQLite database"""
@@ -129,7 +129,7 @@ def create_tables(conn):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
     
     # Ensure geolocation columns exist (for existing databases)
-    ensure_geolocation_columns(conn)
+    ensure_tweet_geolocation_columns(conn)
     
     conn.commit()
     print("Database tables created successfully")
