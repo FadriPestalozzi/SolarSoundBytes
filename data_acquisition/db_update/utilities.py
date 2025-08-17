@@ -15,9 +15,12 @@ def get_project_root() -> str:
 
 
 def get_db_path() -> str:
-    """Get the path to the Twitter database"""
+    """Get the path to the Twitter database (legacy function)"""
     return os.path.join(get_project_root(), "database", "db-twitter.db")
 
+def get_twitter_db_path() -> str:
+    """Get the path to the Twitter database"""
+    return os.path.join(get_project_root(), "database", "db-twitter.db")
 
 def get_news_db_path() -> str:
     """Get the path to the News database"""
