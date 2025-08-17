@@ -11,6 +11,11 @@ import glob
 from datetime import datetime
 import re
 import ast
+import sys
+
+# Import shared utilities
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'db_update'))
+from utilities import get_project_root, get_news_db_path, get_csv_data_dir
 
 
 def create_database_schema(db_path):
@@ -25,6 +30,7 @@ def create_database_schema(db_path):
             title TEXT NOT NULL,
             description TEXT,
             content TEXT,
+            character_count INTEGER,
             url TEXT UNIQUE,
             image TEXT,
             published_at TIMESTAMP,
@@ -108,15 +114,20 @@ def import_csv_to_db(csv_path, db_path):
             else:
                 published_at = published_at.strftime('%Y-%m-%d %H:%M:%S')
             
+            # Calculate character count of content
+            content_text = row['content'] if pd.notna(row['content']) else ''
+            char_count = len(content_text)
+            
             # Insert new record - let database handle URL uniqueness constraint
             cursor.execute('''
                 INSERT INTO news_articles 
-                (title, description, content, url, image, published_at, source_name, source_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (title, description, content, character_count, url, image, published_at, source_name, source_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 row['title'],
                 row['description'],
                 row['content'],
+                char_count,
                 row['url'],
                 row['image'],
                 published_at,
@@ -157,12 +168,9 @@ def main():
     
     print("=== SCRIPT STARTING ===")
     
-    # Define paths relative to script location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.join(script_dir, '..', '..')
-    
-    csv_dir = os.path.join(project_root, 'data', 'csv', 'gnews_articles')
-    db_path = os.path.join(project_root, 'database', 'db-news-articles.db')
+    # Define paths using shared utilities
+    csv_dir = os.path.join(get_csv_data_dir(), 'gnews_articles')
+    db_path = get_news_db_path()
     
     print(f"CSV Directory: {csv_dir}")
     print(f"Database Path: {db_path}")

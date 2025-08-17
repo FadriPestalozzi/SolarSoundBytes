@@ -104,9 +104,11 @@ def data_research_tab():
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Tweets Analyzed", "130,000+")
+        st.metric("Tweets Analyzed", "129,756")
+        st.caption("from 72,088 users")
     with col2:
-        st.metric("News Articles", "4,000+")
+        st.metric("News Articles", "4,093")
+        st.caption("from 186 unique sources")
     with col3:
         st.metric("Total Words Processed", "3M+")
 
@@ -116,7 +118,7 @@ def data_research_tab():
     with col1:
         fig = go.Figure(data=go.Bar(
             x=['Tweets', 'News'],
-            y=[136000, 4093],
+            y=[129756, 4093],
             marker_color=['#1DA1F2', '#FF4500']
         ))
         fig.update_layout(
