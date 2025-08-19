@@ -1,15 +1,50 @@
 import pandas as pd
+import sqlite3
 import os
+import sys
+
+# Add utilities path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'data_acquisition', 'db_update'))
+from utilities import get_twitter_db_path
 
 
 def create_df_of_twitter_result():
-    # base_path = os.path.dirname(__file__)
-    # file_path = os.path.join(base_path, 'data_test', 'twitter_sentiment_analysis_UTF8.csv')
-    # file_path = '../data/csv/twitter_sentiment_analysis_UTF8.csv'
-    csv_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'data_input_streamlit', 'TwitterDays_with_sentiment_0613.csv'))
-
-    data = pd.read_csv(csv_path,  encoding='utf-8')
-
+    """
+    Load tweets with sentiment analysis from database.
+    Returns DataFrame with columns: ['date', 'pos_score', 'neg_score']
+    """
+    db_path = get_twitter_db_path()
+    
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"Twitter database not found at {db_path}")
+    
+    conn = sqlite3.connect(db_path)
+    
+    # Query for tweets with sentiment data
+    query = """
+    SELECT 
+        created_at as Date,
+        CASE 
+            WHEN sentiment = 'POSITIVE' THEN confidence
+            ELSE 0.0
+        END as distilbert_pos_score,
+        CASE 
+            WHEN sentiment = 'NEGATIVE' THEN confidence  
+            ELSE 0.0
+        END as distilbert_neg_score
+    FROM tweets 
+    WHERE sentiment IS NOT NULL 
+    AND created_at IS NOT NULL
+    ORDER BY created_at
+    """
+    
+    data = pd.read_sql_query(query, conn)
+    conn.close()
+    
+    # Convert date column to datetime
+    data['Date'] = pd.to_datetime(data['Date'])
+    
+    # Rename columns to match expected format
     df = data[['Date', 'distilbert_pos_score', 'distilbert_neg_score']]
     df = df.rename(columns={'distilbert_pos_score': 'pos_score',
                             'Date': 'date',
@@ -17,18 +52,46 @@ def create_df_of_twitter_result():
     return df
 
 def create_df_of_twitter_result_events():
-    # base_path = os.path.dirname(__file__)
-    # file_path = os.path.join(base_path, 'data_test', 'twitter_sentiment_analysis_UTF8.csv')
-    # file_path = '../data/csv/twitter_sentiment_analysis_UTF8.csv'
-    csv_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'data_input_streamlit', 'TwitterEvents_with_sentiment_timestamp.xlsx'))
-
-    data = pd.read_excel(csv_path)
-
+    """
+    Load tweets with sentiment analysis for events analysis.
+    Returns DataFrame with columns: ['date', 'pos_score', 'neg_score']
+    """
+    db_path = get_twitter_db_path()
+    
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"Twitter database not found at {db_path}")
+    
+    conn = sqlite3.connect(db_path)
+    
+    # Query for tweets with sentiment data (same as regular tweets for now)
+    query = """
+    SELECT 
+        created_at as Clean_Date,
+        CASE 
+            WHEN sentiment = 'POSITIVE' THEN confidence
+            ELSE 0.0
+        END as distilbert_pos_score,
+        CASE 
+            WHEN sentiment = 'NEGATIVE' THEN confidence  
+            ELSE 0.0
+        END as distilbert_neg_score
+    FROM tweets 
+    WHERE sentiment IS NOT NULL 
+    AND created_at IS NOT NULL
+    ORDER BY created_at
+    """
+    
+    data = pd.read_sql_query(query, conn)
+    conn.close()
+    
+    # Convert date column to datetime
+    data['Clean_Date'] = pd.to_datetime(data['Clean_Date'])
+    
+    # Rename columns to match expected format
     df = data[['Clean_Date', 'distilbert_pos_score', 'distilbert_neg_score']]
     df = df.rename(columns={'distilbert_pos_score': 'pos_score',
                             'Clean_Date': 'date',
                             'distilbert_neg_score': 'neg_score'})
     return df
 
-test = create_df_of_twitter_result()
-print(test.head())
+

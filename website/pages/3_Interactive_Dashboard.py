@@ -5,12 +5,18 @@ import plotly.graph_objects as go2
 import pandas as pd
 import numpy as np
 import os
+import sys
 from datetime import datetime, timedelta
-from data_analysis.import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
-from data_analysis.import_newsarticle_sent_analysis import create_df_of_newsarticle_result
-from data_analysis.process_sp500_df import preprocess_sp500_df
-from data_analysis.import_energy_data import get_energy_df
-from data_analysis.text_creation.create_text import create_text_from_sent_analy_df
+
+# Add paths for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_analysis'))
+
+from import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
+from import_newsarticle_sent_analysis import create_df_of_newsarticle_result
+from process_sp500_df import preprocess_sp500_df
+from import_energy_data import get_energy_df
+from text_creation.create_text import create_text_from_sent_analy_df
 from gtts import gTTS
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 

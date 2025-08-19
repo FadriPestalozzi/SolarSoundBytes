@@ -1,5 +1,5 @@
 import pandas as pd
-from data_analysis.data_sp500 import get_sp500_df
+from data_sp500 import get_sp500_df
 
 
 
