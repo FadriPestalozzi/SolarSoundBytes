@@ -207,7 +207,7 @@ def main():
     .stButton > button:not([kind="primary"]):hover {
         background: transparent !important;
         background-color: transparent !important;
-        background-image: none !important;1
+        background-image: none !important;
         box-shadow: none !important;
     }
     /* Specific styling for the SoundByte Summary button - multiple selectors for maximum compatibility */

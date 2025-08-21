@@ -544,6 +544,18 @@ def render_behind_scenes():
 def main():
     """Main function to run the page"""
     st.set_page_config(page_title="From Data to Podcasts @ ☀️🔊🍔", page_icon="🔧", layout="wide")
+    
+    # Fix text wrapping in expanders
+    st.markdown("""
+    <style>
+    .streamlit-expanderContent div {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     render_behind_scenes()
 
 if __name__ == "__main__":
