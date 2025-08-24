@@ -64,14 +64,14 @@ def data_research_tab():
 
     st.subheader("Data Sources We Explored:")
     st.write("""
-            To compare the sentiment of **news articles** to a broader **public sentiment**, we looked for a fitting twitter and news article datasets.
+            To compare the sentiment of **news articles** to a broader **public sentiment**, we looked for suitable datasets with tweets and news articles.
             Both the **Climate Change Twitter Dataset (15 million tweets spanning over 13 years)** and the **Cleantech Media Dataset by Anacode** looked promising at first, but we could not use them due to several limitations:
             - The lack of full-text tweets in the dataset.
-            - News articles were bias towards positive sentiment.""")
+            - News articles were biased towards positive sentiment.""")
     st.write("""
-            As we were advancing int our process, the Cleantech Media Dataset settled the timeframe of our data collection to **2022-01-02 to 2024-12-24**.
-            After extensive and unsuccessful further research for alternative datasets, we decided to create our own datasets for both, tweets and news articles
-            for a social media sentiment analysis using a scraping actor on [console.apify](https://console.apify.com/).
+            As we were advancing into our process, the Cleantech Media Dataset settled the timeframe of our data collection to **2022-01-02 to 2024-12-24**.
+            After extensive and unsuccessful further research for alternative datasets, we decided to create our own datasets for both tweets and news articles
+            for social media sentiment analysis using a scraping actor on [console.apify](https://console.apify.com/).
              """)
     st.write("### Twitter/X API")
     st.write("""
@@ -110,7 +110,8 @@ def data_research_tab():
         st.metric("News Articles", "4,093")
         st.caption("from 186 unique sources")
     with col3:
-        st.metric("Total Words Processed", "3M+")
+        st.metric("Total Characters Processed", "44.1M")
+        st.caption("~8.8M estimated words")
 
     # Data volume chart
     col1, col2 = st.columns(2)
@@ -128,19 +129,30 @@ def data_research_tab():
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    # Text volume chart (in millions of words)
+    # Text volume chart (actual characters from database)
     with col2:
-        twitts_words = 8 * 136000  # Each tweet ~10 words
-        news_words = 500 * 4093     # Each news article ~500 words
-        fig = go.Figure(data=go.Bar(
-            x=['Tweets ~words', 'News ~words'],
-            y=[twitts_words, news_words],
-            marker_color=['#1DA1F2', '#FF4500']
-        ))
+        tweets_chars = 28_884_812  # Actual characters from Twitter DB
+        news_chars = 15_251_147    # Actual characters from News DB
+        tweets_words = tweets_chars // 5  # Estimated words (5 chars per word)
+        news_words = news_chars // 5      # Estimated words (5 chars per word)
+        
+        fig = go.Figure(data=[
+            go.Bar(
+                name='Characters',
+                x=['Tweets', 'News'],
+                y=[tweets_chars, news_chars],
+                marker_color=['#1DA1F2', '#FF4500'],
+                text=[f'{tweets_chars:,} chars<br>~{tweets_words:,} words', 
+                      f'{news_chars:,} chars<br>~{news_words:,} words'],
+                textposition='inside',
+                textfont=dict(size=10, color='white')
+            )
+        ])
         fig.update_layout(
-            title="Text Volume (Estimated Words)",
+            title="Text Volume (Characters & Estimated Words)",
             height=300,
-            showlegend=False
+            showlegend=False,
+            yaxis_title="Characters"
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -151,7 +163,7 @@ def nlp_models_tab():
     st.header("🤖 NLP Models & Model Selection")
 
     st.markdown("""
-    During prototyping we benchmarked several transformer models, everyone of which can perform sentiment analysis. 
+    During prototyping we benchmarked several transformer models, every one of which can perform sentiment analysis. 
     
     Think of each model as a **recipe**: same ingredients (tweets & news) but different cooking styles that yield dishes of varying quality and cost.
     
@@ -163,7 +175,7 @@ def nlp_models_tab():
     
     st.markdown("**Key Findings:**")
     st.markdown("""
-    - 🎯 Although VADER is the cheapest model, it's inaccuracy renders it useless for us. 
+    - 🎯 Although VADER is the cheapest model, its inaccuracy renders it useless for us. 
     - 💸 Generative models like Gemma3 are expensive and overkill for classification. 
     - 🏆 DistilBERT turns out to be the best trade‑off between speed, memory and accuracy for both short tweets and longer news articles.
     """)
