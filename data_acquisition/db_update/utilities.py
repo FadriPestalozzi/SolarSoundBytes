@@ -11,6 +11,12 @@ import os
 def get_project_root() -> str:
     """Get the absolute path to the project root directory"""
     current_dir = os.path.dirname(__file__)
+    
+    # In Docker/deployment environment, check if we're in /app
+    if os.path.exists("/app") and os.path.basename(os.getcwd()) != "SolarSoundBytes":
+        # We're likely in a Docker container
+        return "/app"
+    
     return os.path.abspath(os.path.join(current_dir, "..", ".."))
 
 
