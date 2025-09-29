@@ -20,20 +20,21 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy all files to the working directory
+# Initialize git lfs
+RUN git lfs install
+
+# Copy the repository files (this will copy LFS pointer files)
 COPY . .
 
-# Initialize git lfs and pull LFS files
-RUN git config --global user.email "deployment@example.com" && \
-    git config --global user.name "Deployment User" && \
-    git lfs install && \
-    echo "Git LFS installed, attempting to pull LFS files..." && \
+# Pull the actual LFS files to replace the pointer files
+# Set up Git configuration for LFS operations
+RUN git config --global user.email "deployment@railway.app" && \
+    git config --global user.name "Railway Deployment" && \
     git lfs pull && \
-    echo "Git LFS pull completed successfully" || \
-    (echo "Git LFS pull failed - checking database file status" && \
-     echo "Checking database files:" && \
-     find database -name "*.db" -exec sh -c 'echo "File: $1, Size: $(stat -c%s "$1") bytes"' _ {} \; && \
-     echo "Continuing deployment - verification script will check database files")
+    echo "Git LFS files pulled successfully" && \
+    echo "Checking database file status:" && \
+    find database -name "*.db" -exec sh -c 'echo "File: $1, Size: $(stat -c%s "$1") bytes"' _ {} \; && \
+    echo "LFS verification completed"
 
 # Environment variable to indicate this is a production deployment
 ENV DEPLOYMENT_ENV=production

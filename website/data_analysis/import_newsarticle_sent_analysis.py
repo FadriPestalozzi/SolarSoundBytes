@@ -43,18 +43,7 @@ def create_df_of_newsarticle_result():
     except sqlite3.DatabaseError as e:
         if 'conn' in locals():
             conn.close()
-        # Provide detailed debugging information for deployment
-        debug_info = f"""
-        Database Error Details:
-        - Database path: {db_path}
-        - File exists: {os.path.exists(db_path)}
-        - File size: {os.path.getsize(db_path) if os.path.exists(db_path) else 'N/A'} bytes
-        - Current working directory: {os.getcwd()}
-        - Project root: {os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))}
-        - Database directory contents: {os.listdir(os.path.dirname(db_path)) if os.path.exists(os.path.dirname(db_path)) else 'Directory does not exist'}
-        - Original error: {e}
-        """
-        raise sqlite3.DatabaseError(f"Invalid database file at {db_path}: {e}\n{debug_info}")
+        raise sqlite3.DatabaseError(f"Invalid database file at {db_path}: {e}")
     
     # Reopen connection for actual data query
     conn = sqlite3.connect(db_path)

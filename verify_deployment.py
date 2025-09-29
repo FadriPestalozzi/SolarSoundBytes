@@ -30,21 +30,8 @@ def check_database_file(db_path):
     
     # Check if this might be a Git LFS pointer file (usually < 200 bytes)
     if file_size < 1000:
-        print(f"WARNING: File size is very small ({file_size} bytes). This might be a Git LFS pointer file.")
-        print("The actual database content may not have been pulled from Git LFS.")
-        
-        # Try to read the file to confirm it's an LFS pointer
-        try:
-            with open(db_path, 'r', encoding='utf-8') as f:
-                content = f.read(200)
-                if 'version https://git-lfs.github.com/spec/v1' in content:
-                    print("CONFIRMED: This is a Git LFS pointer file, not the actual database.")
-                    print("The deployment needs to run 'git lfs pull' to get the actual database files.")
-                else:
-                    print("File content preview:", content[:100])
-        except Exception as e:
-            print(f"Could not read file content: {e}")
-        
+        print(f"ERROR: File size is very small ({file_size} bytes). This appears to be a Git LFS pointer file.")
+        print("The actual database content was not pulled from Git LFS during deployment.")
         return False
     
     # Check if it's a valid SQLite database
