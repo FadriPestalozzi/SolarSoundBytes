@@ -24,7 +24,16 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Initialize git lfs and pull LFS files
-RUN git lfs install && git lfs pull || echo "Git LFS pull failed, proceeding without LFS files"
+RUN git config --global user.email "deployment@example.com" && \
+    git config --global user.name "Deployment User" && \
+    git lfs install && \
+    echo "Git LFS installed, attempting to pull LFS files..." && \
+    git lfs pull && \
+    echo "Git LFS pull completed successfully" || \
+    (echo "Git LFS pull failed - checking database file status" && \
+     echo "Checking database files:" && \
+     find database -name "*.db" -exec sh -c 'echo "File: $1, Size: $(stat -c%s "$1") bytes"' _ {} \; && \
+     echo "Continuing deployment - verification script will check database files")
 
 # Environment variable to indicate this is a production deployment
 ENV DEPLOYMENT_ENV=production
