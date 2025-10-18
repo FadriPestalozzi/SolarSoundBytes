@@ -39,41 +39,48 @@ def download_file(url, filepath, expected_size=None, expected_hash=None):
                 print(f"ERROR: Hash mismatch. Expected: {expected_hash}, Got: {file_hash}")
                 return False
         
-        print(f"✅ Successfully downloaded {os.path.basename(filepath)}")
+        print(f"[SUCCESS] Successfully downloaded {os.path.basename(filepath)}")
         return True
         
     except Exception as e:
-        print(f"❌ Failed to download {os.path.basename(filepath)}: {e}")
+        print(f"[ERROR] Failed to download {os.path.basename(filepath)}: {e}")
         return False
 
-def main():
-    """Handle database files for Railway.app deployment"""
+def download_from_github_release():
+    """Download database files from GitHub releases (if available)"""
+    # You can create a GitHub release with your database files
+    # Replace with your actual GitHub repository and release tag
+    base_url = "https://github.com/yourusername/SolarSoundBytes/releases/download/v1.0.0"
+    
     database_dir = Path("/app/database")
     database_dir.mkdir(exist_ok=True)
     
-    # Check if files are LFS pointer files (small size)
+    files_to_download = [
+        ("db-news-articles.db", f"{base_url}/db-news-articles.db"),
+        ("db-twitter.db", f"{base_url}/db-twitter.db")
+    ]
+    
+    success_count = 0
+    for filename, url in files_to_download:
+        filepath = database_dir / filename
+        if download_file(url, filepath):
+            success_count += 1
+    
+    return success_count == len(files_to_download)
+
+def create_sample_databases():
+    """Create sample databases with functional schema and data"""
+    database_dir = Path("/app/database")
+    database_dir.mkdir(exist_ok=True)
+    
     news_db = database_dir / "db-news-articles.db"
     twitter_db = database_dir / "db-twitter.db"
     
-    needs_replacement = False
-    
-    if news_db.exists() and news_db.stat().st_size < 1000:
-        print(f"❌ {news_db.name} is an LFS pointer file ({news_db.stat().st_size} bytes)")
-        needs_replacement = True
-    
-    if twitter_db.exists() and twitter_db.stat().st_size < 1000:
-        print(f"❌ {twitter_db.name} is an LFS pointer file ({twitter_db.stat().st_size} bytes)")
-        needs_replacement = True
-    
-    if not needs_replacement:
-        print("✅ Database files appear to be valid, no replacement needed")
-        return
-    
-    print("🔄 Creating functional databases for deployment...")
+    print("[INFO] Creating functional databases for deployment...")
     
     # Create a functional SQLite database for news articles
     import sqlite3
-    print("Creating news articles database...")
+    print("[INFO] Creating news articles database...")
     conn = sqlite3.connect(news_db)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS news_sources (
@@ -121,7 +128,7 @@ def main():
     conn.close()
     
     # Create a functional SQLite database for tweets
-    print("Creating tweets database...")
+    print("[INFO] Creating tweets database...")
     conn = sqlite3.connect(twitter_db)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -162,8 +169,93 @@ def main():
     conn.commit()
     conn.close()
     
-    print("✅ Created functional databases for deployment")
-    print("ℹ️  These databases contain sample data for demonstration purposes")
+    print("[SUCCESS] Created functional databases for deployment")
+    print("[INFO] These databases contain sample data for demonstration purposes")
+
+def extract_lfs_files():
+    """Extract LFS files using git lfs pull"""
+    import subprocess
+    import os
+    
+    print("[INFO] Attempting to extract LFS files...")
+    
+    try:
+        # Change to the correct directory
+        if os.path.exists("/app"):
+            os.chdir("/app")
+        else:
+            # We're running locally, stay in current directory
+            pass
+        
+        # Try to pull LFS files
+        result = subprocess.run(
+            ["git", "lfs", "pull"],
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minute timeout
+        )
+        
+        if result.returncode == 0:
+            print("[SUCCESS] Successfully extracted LFS files")
+            return True
+        else:
+            print(f"[ERROR] Git LFS pull failed: {result.stderr}")
+            return False
+            
+    except subprocess.TimeoutExpired:
+        print("[ERROR] Git LFS pull timed out")
+        return False
+    except Exception as e:
+        print(f"[ERROR] Error running git lfs pull: {e}")
+        return False
+
+def main():
+    """Handle database files for Railway.app deployment"""
+    # Determine the correct database directory based on environment
+    if os.path.exists("/app"):
+        # We're in a Docker container (Railway deployment)
+        database_dir = Path("/app/database")
+    else:
+        # We're running locally
+        database_dir = Path("database")
+    
+    database_dir.mkdir(exist_ok=True)
+    
+    # Check if files are LFS pointer files (small size)
+    news_db = database_dir / "db-news-articles.db"
+    twitter_db = database_dir / "db-twitter.db"
+    
+    needs_replacement = False
+    
+    if news_db.exists() and news_db.stat().st_size < 1000:
+        print(f"[ERROR] {news_db.name} is an LFS pointer file ({news_db.stat().st_size} bytes)")
+        needs_replacement = True
+    
+    if twitter_db.exists() and twitter_db.stat().st_size < 1000:
+        print(f"[ERROR] {twitter_db.name} is an LFS pointer file ({twitter_db.stat().st_size} bytes)")
+        needs_replacement = True
+    
+    if not needs_replacement:
+        print("[SUCCESS] Database files appear to be valid, no replacement needed")
+        return
+    
+    print("[INFO] Attempting to extract LFS files from repository...")
+    
+    # Try to extract LFS files first
+    if extract_lfs_files():
+        # Check if the files are now valid
+        news_valid = news_db.exists() and news_db.stat().st_size >= 1000
+        twitter_valid = twitter_db.exists() and twitter_db.stat().st_size >= 1000
+        
+        if news_valid and twitter_valid:
+            print("[SUCCESS] Successfully extracted real database files from LFS")
+            return
+        else:
+            print("[WARNING] LFS extraction completed but files still appear invalid")
+    
+    # Fallback: Create sample databases
+    print("[WARNING] Could not extract real database files, creating sample databases...")
+    create_sample_databases()
 
 if __name__ == "__main__":
     main()

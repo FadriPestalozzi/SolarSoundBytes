@@ -30,6 +30,8 @@ RUN git lfs install && \
     echo "Git LFS initialized" && \
     echo "Checking database file status:" && \
     find database -name "*.db" -exec sh -c 'echo "File: $1, Size: $(stat -c%s "$1") bytes"' _ {} \; && \
+    echo "Attempting to pull LFS files..." && \
+    git lfs pull || echo "LFS pull failed, will use fallback method" && \
     python download_databases.py && \
     echo "Final database file status:" && \
     find database -name "*.db" -exec sh -c 'echo "File: $1, Size: $(stat -c%s "$1") bytes"' _ {} \; && \
