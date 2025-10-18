@@ -77,11 +77,22 @@ def create_sample_databases():
     twitter_db = database_dir / "db-twitter.db"
     
     print("[INFO] Creating functional databases for deployment...")
+    # Remove any existing LFS pointer files so SQLite can create real DB files
+    try:
+        if news_db.exists():
+            news_db.unlink()
+    except Exception:
+        pass
+    try:
+        if twitter_db.exists():
+            twitter_db.unlink()
+    except Exception:
+        pass
     
     # Create a functional SQLite database for news articles
     import sqlite3
     print("[INFO] Creating news articles database...")
-    conn = sqlite3.connect(news_db)
+    conn = sqlite3.connect(str(news_db))
     conn.execute("""
         CREATE TABLE IF NOT EXISTS news_sources (
             id INTEGER PRIMARY KEY,
@@ -129,7 +140,7 @@ def create_sample_databases():
     
     # Create a functional SQLite database for tweets
     print("[INFO] Creating tweets database...")
-    conn = sqlite3.connect(twitter_db)
+    conn = sqlite3.connect(str(twitter_db))
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
