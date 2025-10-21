@@ -12,13 +12,129 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_analysis'))
 
-from import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
-from import_newsarticle_sent_analysis import create_df_of_newsarticle_result
-from process_sp500_df import preprocess_sp500_df
-from import_energy_data import get_energy_df
 from text_creation.create_text import create_text_from_sent_analy_df
 from gtts import gTTS
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
+
+# --- CSV Data Loading Functions ---
+def load_news_data():
+    """Load news articles data from CSV file"""
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'combined_articles_with_sentiment.csv')
+    df = pd.read_csv(csv_path)
+    
+    # Rename columns to match expected format
+    df = df.rename(columns={
+        'Clean_Date': 'date',
+        'distilbert_pos_score': 'pos_score',
+        'distilbert_neg_score': 'neg_score'
+    })
+    
+    # Convert date column
+    df['date'] = pd.to_datetime(df['date'])
+    
+    return df
+
+def load_twitter_data():
+    """Load Twitter sentiment data from CSV file"""
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'twitter_sentiment_analysis_UTF8.csv')
+    df = pd.read_csv(csv_path)
+    
+    # Rename columns to match expected format
+    df = df.rename(columns={
+        'createdAt': 'date',
+        'confidence score': 'confidence_score'
+    })
+    
+    # Convert date column
+    df['date'] = pd.to_datetime(df['date'])
+    
+    # Convert sentiment labels to numeric scores
+    def sentiment_to_scores(sentiment, confidence):
+        if sentiment == 'positive':
+            return confidence, 1 - confidence
+        elif sentiment == 'negative':
+            return 1 - confidence, confidence
+        else:  # neutral
+            return 0.5, 0.5
+    
+    # Apply sentiment conversion
+    scores = df.apply(lambda row: sentiment_to_scores(row['sentiment'], row['confidence_score']), axis=1)
+    df['pos_score'] = [score[0] for score in scores]
+    df['neg_score'] = [score[1] for score in scores]
+    
+    return df
+
+def load_twitter_events_data():
+    """Load Twitter events data from CSV file"""
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'TwitterDays_with_sentiment_0613.csv')
+    df = pd.read_csv(csv_path)
+    
+    # Rename columns to match expected format
+    df = df.rename(columns={
+        'Date': 'date',
+        'distilbert_pos_score': 'pos_score',
+        'distilbert_neg_score': 'neg_score'
+    })
+    
+    # Convert date column
+    df['date'] = pd.to_datetime(df['date'])
+    
+    return df
+
+def load_sp500_data():
+    """Load S&P 500 data from CSV file"""
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'sp500_2022_2024_dataset.csv')
+    df = pd.read_csv(csv_path, sep=';')
+    
+    # Convert Date column with dayfirst=True for DD.MM.YYYY format
+    df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y', errors='coerce')
+    
+    # Remove any rows with invalid dates
+    df = df.dropna(subset=['Date'])
+    
+    # Clean Price column - remove commas and convert to float
+    df['Price'] = df['Price'].astype(str).str.replace(',', '').astype(float)
+    
+    # Create monthly aggregation
+    df['month'] = df['Date'].dt.to_period('M').dt.to_timestamp()
+    monthly_sp500 = df.groupby('month')['Price'].mean().reset_index()
+    
+    return monthly_sp500
+
+def load_energy_data():
+    """Load renewable energy capacity data from CSV file"""
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'monthly_capacity_wind_solar_public_release_file.csv')
+    df = pd.read_csv(csv_path)
+    
+    # Create date column from Month and Year
+    df['Date'] = pd.to_datetime(df[['Year', 'Month']].assign(day=1))
+    
+    # Aggregate all countries by month to get global totals
+    monthly_energy = df.groupby('Date')['Installed Capacity'].sum().reset_index()
+    monthly_energy = monthly_energy.rename(columns={'Date': 'month', 'Installed Capacity': 'Installed Capacity'})
+    
+    return monthly_energy
+
+# --- Data Loading Functions (replacing database calls) ---
+def create_df_of_newsarticle_result():
+    """Load news articles data from CSV"""
+    return load_news_data()
+
+def create_df_of_twitter_result():
+    """Load Twitter data from CSV"""
+    return load_twitter_data()
+
+def create_df_of_twitter_result_events():
+    """Load Twitter events data from Excel"""
+    return load_twitter_events_data()
+
+def preprocess_sp500_df():
+    """Load and preprocess S&P 500 data from CSV"""
+    return load_sp500_data()
+
+def get_energy_df():
+    """Load energy data from CSV"""
+    return load_energy_data()
 
 # ---- All dashboard.py functions below (copied verbatim for reuse) ----
 
@@ -81,11 +197,11 @@ def interactive_dashboard():
         line=dict(color='blue')
     ))
 
-    df_energy['Date'] = pd.to_datetime(df_energy['Date'])
-    filtered_df_energy = df_energy[(df_energy['Date'] >= start_date) & (df_energy['Date'] <= end_date)]
+    df_energy['month'] = pd.to_datetime(df_energy['month'])
+    filtered_df_energy = df_energy[(df_energy['month'] >= start_date) & (df_energy['month'] <= end_date)]
 
     fig.add_trace(go2.Scatter(
-        x=filtered_df_energy['Date'], y=filtered_df_energy['Installed Capacity'],
+        x=filtered_df_energy['month'], y=filtered_df_energy['Installed Capacity'],
         name='Installed Capacity Solar + Wind (MW)',
         yaxis='y2',
         mode='lines',
