@@ -54,8 +54,15 @@ def create_df_of_newsarticle_result():
         # Create SQLAlchemy engine for better pandas compatibility
         engine = create_engine(db_url)
 
-        # Query for news articles with sentiment data (SQLite doesn't use schemas)
-        query = """
+        # Determine table name based on database type
+        # PostgreSQL uses schema.table format, SQLite uses just table name
+        if 'postgresql://' in db_url:
+            table_name = 'news.news_articles'
+        else:
+            table_name = 'news_articles'
+
+        # Query for news articles with sentiment data
+        query = f"""
         SELECT
             published_at as date,
             CASE
@@ -66,7 +73,7 @@ def create_df_of_newsarticle_result():
                 WHEN sentiment = 'NEGATIVE' THEN confidence
                 ELSE 0.0
             END as neg_score
-        FROM news_articles
+        FROM {table_name}
         WHERE sentiment IS NOT NULL
         AND published_at IS NOT NULL
         ORDER BY published_at
@@ -75,7 +82,7 @@ def create_df_of_newsarticle_result():
         data = pd.read_sql_query(query, engine)
 
     except Exception as e:
-        raise ConnectionError(f"Failed to connect to PostgreSQL database: {e}")
+        raise ConnectionError(f"Failed to connect to database: {e}")
 
     # Convert date column to datetime and remove timezone info for compatibility
     data['date'] = pd.to_datetime(data['date']).dt.tz_localize(None)

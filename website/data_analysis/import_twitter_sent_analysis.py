@@ -60,8 +60,15 @@ def create_df_of_twitter_result():
         # Create SQLAlchemy engine for better pandas compatibility
         engine = create_engine(db_url)
 
-        # Query for tweets with sentiment data (SQLite doesn't use schemas)
-        query = """
+        # Determine table name based on database type
+        # PostgreSQL uses schema.table format, SQLite uses just table name
+        if 'postgresql://' in db_url:
+            table_name = 'twitter.tweets'
+        else:
+            table_name = 'tweets'
+
+        # Query for tweets with sentiment data
+        query = f"""
         SELECT
             created_at as date,
             CASE
@@ -72,7 +79,7 @@ def create_df_of_twitter_result():
                 WHEN sentiment = 'NEGATIVE' THEN confidence
                 ELSE 0.0
             END as neg_score
-        FROM tweets
+        FROM {table_name}
         WHERE sentiment IS NOT NULL
         AND created_at IS NOT NULL
         ORDER BY created_at
@@ -81,7 +88,7 @@ def create_df_of_twitter_result():
         data = pd.read_sql_query(query, engine)
 
     except Exception as e:
-        raise ConnectionError(f"Failed to connect to PostgreSQL database: {e}")
+        raise ConnectionError(f"Failed to connect to database: {e}")
 
     # Convert date column to datetime and remove timezone info for compatibility
     data['date'] = pd.to_datetime(data['date']).dt.tz_localize(None)
@@ -99,8 +106,15 @@ def create_df_of_twitter_result_events():
         # Create SQLAlchemy engine for better pandas compatibility
         engine = create_engine(db_url)
 
+        # Determine table name based on database type
+        # PostgreSQL uses schema.table format, SQLite uses just table name
+        if 'postgresql://' in db_url:
+            table_name = 'twitter.tweets'
+        else:
+            table_name = 'tweets'
+
         # Query for tweets with sentiment data (same as regular tweets for now)
-        query = """
+        query = f"""
         SELECT
             created_at as date,
             CASE
@@ -111,7 +125,7 @@ def create_df_of_twitter_result_events():
                 WHEN sentiment = 'NEGATIVE' THEN confidence
                 ELSE 0.0
             END as neg_score
-        FROM tweets
+        FROM {table_name}
         WHERE sentiment IS NOT NULL
         AND created_at IS NOT NULL
         ORDER BY created_at
@@ -120,7 +134,7 @@ def create_df_of_twitter_result_events():
         data = pd.read_sql_query(query, engine)
 
     except Exception as e:
-        raise ConnectionError(f"Failed to connect to PostgreSQL database: {e}")
+        raise ConnectionError(f"Failed to connect to database: {e}")
 
     # Convert date column to datetime and remove timezone info for compatibility
     data['date'] = pd.to_datetime(data['date']).dt.tz_localize(None)
