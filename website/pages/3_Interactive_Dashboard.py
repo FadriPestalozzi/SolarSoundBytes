@@ -12,74 +12,38 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_analysis'))
 
+# Install required dependencies if not available
+try:
+    import sqlalchemy
+    import psycopg2
+except ImportError:
+    import subprocess
+    import sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "sqlalchemy", "psycopg2-binary"])
+    import sqlalchemy
+    import psycopg2
+
+# Import data loading functions from PostgreSQL
+from import_newsarticle_sent_analysis import create_df_of_newsarticle_result
+from import_twitter_sent_analysis import create_df_of_twitter_result, create_df_of_twitter_result_events
+
 from text_creation.create_text import create_text_from_sent_analy_df
 from gtts import gTTS
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 
-# --- CSV Data Loading Functions ---
+# --- PostgreSQL Data Loading Functions ---
 def load_news_data():
-    """Load news articles data from CSV file"""
-    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'combined_articles_with_sentiment.csv')
-    df = pd.read_csv(csv_path)
-    
-    # Rename columns to match expected format
-    df = df.rename(columns={
-        'Clean_Date': 'date',
-        'distilbert_pos_score': 'pos_score',
-        'distilbert_neg_score': 'neg_score'
-    })
-    
-    # Convert date column
-    df['date'] = pd.to_datetime(df['date'])
-    
-    return df
+    """Load news articles data from PostgreSQL database"""
+    return create_df_of_newsarticle_result()
 
 def load_twitter_data():
-    """Load Twitter sentiment data from CSV file"""
-    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'twitter_sentiment_analysis_UTF8.csv')
-    df = pd.read_csv(csv_path)
-    
-    # Rename columns to match expected format
-    df = df.rename(columns={
-        'createdAt': 'date',
-        'confidence score': 'confidence_score'
-    })
-    
-    # Convert date column
-    df['date'] = pd.to_datetime(df['date'])
-    
-    # Convert sentiment labels to numeric scores
-    def sentiment_to_scores(sentiment, confidence):
-        if sentiment == 'positive':
-            return confidence, 1 - confidence
-        elif sentiment == 'negative':
-            return 1 - confidence, confidence
-        else:  # neutral
-            return 0.5, 0.5
-    
-    # Apply sentiment conversion
-    scores = df.apply(lambda row: sentiment_to_scores(row['sentiment'], row['confidence_score']), axis=1)
-    df['pos_score'] = [score[0] for score in scores]
-    df['neg_score'] = [score[1] for score in scores]
-    
-    return df
+    """Load Twitter sentiment data from PostgreSQL database"""
+    return create_df_of_twitter_result()
 
 def load_twitter_events_data():
-    """Load Twitter events data from CSV file"""
-    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_input_streamlit', 'TwitterDays_with_sentiment_0613.csv')
-    df = pd.read_csv(csv_path)
-    
-    # Rename columns to match expected format
-    df = df.rename(columns={
-        'Date': 'date',
-        'distilbert_pos_score': 'pos_score',
-        'distilbert_neg_score': 'neg_score'
-    })
-    
-    # Convert date column
-    df['date'] = pd.to_datetime(df['date'])
-    
-    return df
+    """Load Twitter events data from PostgreSQL database"""
+    return create_df_of_twitter_result_events()
+
 
 def load_sp500_data():
     """Load S&P 500 data from CSV file"""
@@ -115,18 +79,6 @@ def load_energy_data():
     
     return monthly_energy
 
-# --- Data Loading Functions (replacing database calls) ---
-def create_df_of_newsarticle_result():
-    """Load news articles data from CSV"""
-    return load_news_data()
-
-def create_df_of_twitter_result():
-    """Load Twitter data from CSV"""
-    return load_twitter_data()
-
-def create_df_of_twitter_result_events():
-    """Load Twitter events data from Excel"""
-    return load_twitter_events_data()
 
 def preprocess_sp500_df():
     """Load and preprocess S&P 500 data from CSV"""
@@ -804,7 +756,11 @@ def main():
     if not api_key_from_secrets:
         api_key_from_secrets = os.getenv("OPENAI_API_KEY")
     
-    # Method 3: Check if no API key found
+    # Method 3: Try alternative API_KEY environment variable
+    if not api_key_from_secrets:
+        api_key_from_secrets = os.getenv("API_KEY")
+    
+    # Method 4: Check if no API key found
     if not api_key_from_secrets:
         st.warning("OpenAI API Key not found. To generate AI report, please set your OPENAI_API_KEY in .streamlit/secrets.toml or as an environment variable.")
 

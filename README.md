@@ -230,13 +230,16 @@ To install the required packages and their versions, run the command below.
 pip install -r requirements.txt
 ```
 
-## data folder (optional) 
-
-In case you're in the mood to play around with additional data, you can place that into a corresponding data/ folder, already in .gitignore. 
-
+## activate virtual environment
 
 ```shell
-mkdir data
+pyenv activate SolarSoundBytes
+```
+
+## run locally
+
+```shell
+streamlit run website/pages/3_Interactive_Dashboard.py
 ```
 
 # 📚 List Acronyms

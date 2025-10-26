@@ -5,7 +5,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-api_key = os.getenv("API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
 
 
 def create_text_from_sent_analy_df(data_twitter, data_news, data_sp500, data_energy, selected_metrics=None, relevant_events=None):
