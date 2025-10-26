@@ -16,9 +16,18 @@ COPY . .
 # Add the current directory to Python path
 ENV PYTHONPATH="${PYTHONPATH}:/app"
 
+# Set default port (Railway will override with $PORT)
+ENV PORT=8080
+
 # Expose port for deployment to railway.com
-EXPOSE 8080
+EXPOSE $PORT
 
 # Run Streamlit app
-CMD ["sh", "-c", "streamlit run website/Welcome.py --server.address 0.0.0.0 --server.port $PORT"]
+CMD streamlit run website/Welcome.py \
+    --server.address=0.0.0.0 \
+    --server.port=$PORT \
+    --server.headless=true \
+    --browser.serverAddress="0.0.0.0" \
+    --browser.gatherUsageStats=false \
+    --server.enableCORS=false
 

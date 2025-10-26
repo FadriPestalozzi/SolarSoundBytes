@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image
 import glob
 import os
-import time
 from shared_components import get_emoji_title, render_emoji_title_header, get_emoji_link_text, render_footer
 
 def main():
@@ -111,22 +110,22 @@ def main():
     # Render the reusable footer
     render_footer()
 
-    # --- Image Carousel ---
+    # --- Image Gallery ---
     st.markdown("---")
     
-    carousel_container = st.container()
-    with carousel_container:
+    gallery_container = st.container()
+    with gallery_container:
         # Get all image files from the welcome-carousel folder and subdirectories
         image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.webp', '*.avif']
-        carousel_images = []
+        gallery_images = []
         
         for extension in image_extensions:
             # Search in main folder and subdirectories
-            carousel_images.extend(glob.glob(f'website/images/welcome-carousel/**/{extension}', recursive=True))
+            gallery_images.extend(glob.glob(f'website/images/welcome-carousel/**/{extension}', recursive=True))
         
         # Filter out directories and validate image files
         valid_images = []
-        for img_path in carousel_images:
+        for img_path in gallery_images:
             if os.path.isfile(img_path):
                 try:
                     # Try to open the image to validate it
@@ -139,18 +138,11 @@ def main():
                     continue
         
         if valid_images:
-            # Initialize session state for carousel index
-            if 'carousel_index' not in st.session_state:
-                st.session_state.carousel_index = 0
-
-            # Show current image
-            current_image = valid_images[st.session_state.carousel_index]
-            st.image(current_image, width=200, use_container_width=True)
-
-            # Wait for 5 seconds, then move to next image and rerun
-            time.sleep(5)
-            st.session_state.carousel_index = (st.session_state.carousel_index + 1) % len(valid_images)
-            st.rerun()
+            # Display images in columns instead of auto-carousel
+            cols = st.columns(min(3, len(valid_images)))
+            for idx, img_path in enumerate(valid_images[:3]):  # Show first 3 images
+                with cols[idx % 3]:
+                    st.image(img_path, use_container_width=True)
 
 
 if __name__ == "__main__":
