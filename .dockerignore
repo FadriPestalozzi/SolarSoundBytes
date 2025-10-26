@@ -1,52 +1,43 @@
-# Don't copy these to Docker container
-__pycache__/
+# SQLite database files (only for local testing)
+database/*.db
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python cache
+__pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
+*.so
+*.egg
+*.egg-info
+dist
+build
 
-# IDE files
-.vscode/
-.idea/
+# Environment files
+.env
+.env.local
+
+# Documentation and images (not needed in production)
+documentation/
+images/
+
+# Jupyter notebooks
+*.ipynb
+
+# Test files
+test-*
+
+# IDE
+.vscode
+.idea
 *.swp
 *.swo
-*~
 
 # OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-
-# Development files
-*.md
-documentation/
-images/
-notebooks/
-data/0-local-scripts/
-data/1-to-refactor/
-
-# Keep database files and essential data
-!database/
-!data/csv/
-!website/data_input_streamlit/
