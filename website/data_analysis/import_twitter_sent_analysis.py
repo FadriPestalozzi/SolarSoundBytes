@@ -9,22 +9,8 @@ import streamlit as st
 load_dotenv()
 
 def get_database_url():
-    """Get Twitter database URL from environment or use Railway internal URL for deployment"""
-    # For Railway deployment, use the internal URL (only when RAILWAY_ENVIRONMENT is "production")
+    """Get Twitter database URL from environment variables or Streamlit secrets"""
     # Check both Streamlit secrets and environment variables
-    railway_env = None
-    try:
-        railway_env = st.secrets.get('RAILWAY_ENVIRONMENT')
-    except:
-        railway_env = os.environ.get('RAILWAY_ENVIRONMENT')
-    
-    if railway_env and railway_env.lower() == 'production':
-        try:
-            return st.secrets.get('RAILWAY_DATABASE_URL')
-        except:
-            return os.environ.get('RAILWAY_DATABASE_URL')
-
-    # For local development, prioritize Streamlit secrets over .env
     db_url = None
     try:
         db_url = st.secrets.get('DATABASE_PUBLIC_URL')
@@ -32,10 +18,16 @@ def get_database_url():
         pass
     
     if not db_url:
+        try:
+            db_url = st.secrets.get('DATABASE_URL')
+        except:
+            pass
+    
+    if not db_url:
         db_url = os.environ.get('DATABASE_PUBLIC_URL') or os.environ.get('DATABASE_URL')
     
     if not db_url:
-        raise ValueError("DATABASE_PUBLIC_URL not found in environment variables. Please check your .env file or Streamlit secrets.")
+        raise ValueError("DATABASE_URL or DATABASE_PUBLIC_URL not found in environment variables. Please check your .env file or Streamlit secrets.")
 
     # Handle SQLite paths: resolve relative paths to absolute paths
     if db_url.startswith('sqlite:///'):
