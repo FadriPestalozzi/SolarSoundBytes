@@ -458,7 +458,7 @@ def main():
         
         # Use events-specific data for the selected event
         # Filter Twitter events data
-        df_twitter_events['date'] = pd.to_datetime(df_twitter_events['date']).dt.tz_convert(None)
+        df_twitter_events['date'] = pd.to_datetime(df_twitter_events['date'])
         df_twitter_filtered = df_twitter_events[(df_twitter_events['date'] >= start_date) & (df_twitter_events['date'] <= end_date)].copy()
         df_twitter_filtered['date'] = pd.to_datetime(df_twitter_filtered['date'])
         df_twitter_filtered['hour'] = df_twitter_filtered['date'].dt.to_period('H').dt.to_timestamp()
